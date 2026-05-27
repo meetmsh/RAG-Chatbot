@@ -61,11 +61,7 @@ export default function LoginPage() {
       </div>
 
       {/* Right side */}
-      <div className="hidden lg:flex flex-1 flex-col justify-center px-16 bg-[#C35FFF] overflow-hidden relative">
-        {/* Decorative blobs */}
-        <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/10 blur-3xl" />
-        <div className="absolute -bottom-32 -left-16 w-80 h-80 rounded-full bg-[#a040e0]/60 blur-3xl" />
-
+      <div className="hidden lg:flex flex-1 flex-col justify-center px-16 bg-[#24B1B1] overflow-hidden relative">
         <div className="relative z-10 mx-auto w-full max-w-sm flex flex-col gap-8">
           <h2 className="text-5xl font-bold text-white leading-[1.15] tracking-tight">
             Ask your documents anything.
