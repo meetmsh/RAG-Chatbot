@@ -61,20 +61,17 @@ export default function LoginPage() {
       </div>
 
       {/* Right side */}
-      <div className="hidden lg:flex flex-1 flex-col justify-between bg-[#C35FFF] px-16 py-16 overflow-hidden relative">
+      <div className="hidden lg:flex flex-1 flex-col justify-center px-16 bg-[#C35FFF] overflow-hidden relative">
         {/* Decorative blobs */}
         <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/10 blur-3xl" />
         <div className="absolute -bottom-32 -left-16 w-80 h-80 rounded-full bg-[#a040e0]/60 blur-3xl" />
 
-        {/* Top label */}
-
-        {/* Center content */}
-        <div className="relative z-10 flex flex-col gap-10">
-          <h2 className="text-5xl font-bold text-white leading-[1.15] tracking-tight max-w-xs">
+        <div className="relative z-10 mx-auto w-full max-w-sm flex flex-col gap-8">
+          <h2 className="text-5xl font-bold text-white leading-[1.15] tracking-tight">
             Ask your documents anything.
           </h2>
 
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-1 border-l-2 border-white/30 pl-5">
               <span className="text-xs font-semibold tracking-widest text-white/50 uppercase">
                 Upload
