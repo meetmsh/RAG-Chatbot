@@ -63,8 +63,9 @@ export default function LoginPage() {
       {/* Right side */}
       <div className="hidden lg:flex flex-1 flex-col justify-center px-16 bg-[#24B1B1] overflow-hidden relative">
         <div className="relative z-10 mx-auto w-full max-w-sm flex flex-col gap-8">
-          <h2 className="text-5xl font-bold text-white leading-[1.15] tracking-tight">
-            Ask your documents anything.
+          <h2 className="text-5xl font-bold leading-[1.12] tracking-[-0.02em]">
+            <span className="text-white">Ask your documents </span>
+            <span className="text-white/60">anything</span>
           </h2>
 
           <div className="flex flex-col gap-6">
