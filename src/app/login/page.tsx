@@ -61,87 +61,161 @@ export default function LoginPage() {
       </div>
 
       {/* Right side — system reliability showcase */}
-      <div className="hidden lg:flex flex-1 flex-col justify-center items-center bg-neutral-900 relative overflow-hidden px-12">
-
-        {/* Subtle grid bg */}
-        <div className="absolute inset-0 opacity-[0.04]" style={{backgroundImage:'linear-gradient(#a78bfa 1px,transparent 1px),linear-gradient(90deg,#a78bfa 1px,transparent 1px)',backgroundSize:'32px 32px'}} />
+      <div className="hidden lg:flex flex-1 flex-col justify-center items-center bg-[#C35FFF] relative overflow-hidden px-12">
         {/* Violet glow */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-125 h-64 rounded-full bg-violet-600/20 blur-3xl pointer-events-none" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-125 h-64 rounded-full bg-violet-300/40 blur-3xl pointer-events-none" />
 
         <div className="relative w-full max-w-md">
-
           {/* Terminal window */}
-          <div className="rounded-xl overflow-hidden border border-white/10 shadow-2xl">
-
+          <div className="rounded-xl overflow-hidden border border-violet-100 shadow-xl shadow-violet-100/50">
             {/* Title bar */}
-            <div className="bg-neutral-800 px-4 py-2.5 flex items-center gap-2 border-b border-white/5">
-              <div className="size-2.5 rounded-full bg-red-500/80" />
-              <div className="size-2.5 rounded-full bg-yellow-500/80" />
-              <div className="size-2.5 rounded-full bg-green-500/80" />
-              <span className="ml-3 text-[11px] text-neutral-500 font-mono">ragchat — incident-investigation</span>
-              <div className="ml-auto flex items-center gap-1.5">
-                <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-[10px] text-neutral-500">live</span>
-              </div>
+            <div className="bg-white px-4 py-2.5 flex items-center gap-2 border-b border-slate-100">
+              <div className="size-2.5 rounded-full bg-red-400/80" />
+              <div className="size-2.5 rounded-full bg-yellow-400/80" />
+              <div className="size-2.5 rounded-full bg-green-400/80" />
+              <span className="ml-3 text-[11px] text-slate-400 font-mono">
+                Incident Investigation
+              </span>
             </div>
 
             {/* Chat area */}
-            <div className="bg-neutral-950 px-5 py-5 flex flex-col gap-4 font-mono">
-
+            <div className="bg-slate-50 px-5 py-5 flex flex-col gap-4 font-mono">
               {/* User prompt */}
               <div className="flex justify-end">
-                <div className="max-w-[82%] rounded-xl rounded-tr-sm bg-violet-600/90 px-3.5 py-2.5 text-xs text-white leading-relaxed shadow-lg shadow-violet-900/40">
-                  Investigate the memory leak on deployment #09-A
+                <div className="max-w-[82%] rounded-xl rounded-tr-sm bg-violet-600 px-3.5 py-2.5 text-xs text-white leading-relaxed shadow-md shadow-violet-200">
+                  Any red flags in this NDA?
                 </div>
               </div>
 
               {/* AI streamed response */}
               <div className="flex gap-3 items-start">
-                <div className="size-6 shrink-0 rounded-lg bg-violet-500/20 border border-violet-500/30 flex items-center justify-center mt-0.5">
-                  <svg className="size-3 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-                  </svg>
-                </div>
-                <div className="flex-1 rounded-xl rounded-tl-sm bg-neutral-800 border border-white/5 px-4 py-3 text-xs leading-relaxed">
-                  <p className="text-neutral-300">
-                    Analyzed <span className="text-violet-400">Vercel execution logs</span>. Similarity match found in{' '}
-                    <span className="text-emerald-400">post-mortem #244</span>.
-                  </p>
-                  <p className="mt-1.5 text-neutral-300">
-                    Memory spike correlates to unclosed database connections in edge function{' '}
-                    <span className="text-amber-400">/api/analytics</span> at{' '}
-                    <span className="text-red-400">line 42</span>.
+                <div className="flex-1 rounded-xl rounded-tl-sm bg-white border border-slate-100 px-4 py-3 text-xs leading-relaxed shadow-sm">
+                  <p className="text-slate-600">
+                    Found{' '}
+                    <span className="text-red-500 font-medium">2 concerns</span>{' '}
+                    in{' '}
+                    <span className="text-violet-600 font-medium">
+                      nda-draft.pdf
+                    </span>
+                    :
                   </p>
 
-                  {/* Inline log lines */}
-                  <div className="mt-3 rounded-lg bg-neutral-900 border border-white/5 px-3 py-2.5 flex flex-col gap-1">
-                    <p className="text-[10px] text-neutral-500">&gt; <span className="text-neutral-400">_Analyzing server logs</span><span className="animate-pulse text-violet-400">▋</span></p>
-                    <p className="text-[10px] text-neutral-500">&gt; <span className="text-emerald-400">Match found</span><span className="text-neutral-500">: pgvector similarity 0.94</span></p>
-                    <p className="text-[10px] text-neutral-500">&gt; <span className="text-amber-400">heap_used</span><span className="text-neutral-500">: 487MB → 1.2GB over 14 min</span></p>
+                  <div className="mt-2.5 flex flex-col gap-2">
+                    <div className="flex items-start gap-2 rounded-lg bg-red-50 border border-red-100 px-2.5 py-2">
+                      <span className="mt-0.5 shrink-0 text-red-500">⚠</span>
+                      <p className="text-slate-600">
+                        <span className="font-medium text-slate-700">
+                          Clause 4.2
+                        </span>{' '}
+                        — overly broad IP assignment, covers{' '}
+                        <span className="text-red-500 font-medium">
+                          pre-existing work
+                        </span>
+                        .
+                      </p>
+                    </div>
+                    <div className="flex items-start gap-2 rounded-lg bg-amber-50 border border-amber-100 px-2.5 py-2">
+                      <span className="mt-0.5 shrink-0 text-amber-500">⚠</span>
+                      <p className="text-slate-600">
+                        <span className="font-medium text-slate-700">
+                          Clause 9
+                        </span>{' '}
+                        —{' '}
+                        <span className="text-amber-600 font-medium">
+                          one-sided
+                        </span>{' '}
+                        non-compete, no mutual obligation.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Log lines */}
+                  <div className="mt-3 rounded-lg bg-slate-50 border border-slate-100 px-3 py-2.5 flex flex-col gap-1">
+                    <p className="text-[10px] text-slate-400">
+                      &gt;{' '}
+                      <span className="text-slate-500">
+                        _Scanning nda-draft.pdf
+                      </span>
+                      <span className="animate-pulse text-violet-500">▋</span>
+                    </p>
+                    <p className="text-[10px] text-slate-400">
+                      &gt;{' '}
+                      <span className="text-red-500">Risk vectors found</span>
+                      <span className="text-slate-400">: 2</span>
+                    </p>
+                    <p className="text-[10px] text-slate-400">
+                      &gt;{' '}
+                      <span className="text-violet-500">Pages flagged</span>
+                      <span className="text-slate-400">: 4, 9</span>
+                    </p>
                   </div>
 
                   {/* Source badge */}
-                  <div className="mt-3 flex items-center gap-1.5">
-                    <span className="size-1.5 rounded-full bg-violet-400 shrink-0" />
-                    <span className="text-[10px] text-neutral-500">Sourced from <span className="text-neutral-400 font-medium">db-pool-leak-2025.log</span></span>
+                  <div className="mt-3 flex items-center gap-2">
+                    <div className="flex items-center gap-1 rounded-md bg-red-50 border border-red-100 px-2 py-1">
+                      <svg
+                        className="size-2.5 text-red-400 shrink-0"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM6 20V4h5v7h7v9H6z" />
+                      </svg>
+                      <span className="text-[10px] text-red-500 font-medium">
+                        nda-draft.pdf
+                      </span>
+                    </div>
+                    <span className="text-[10px] text-slate-400">
+                      2 risks · p. 4, 9
+                    </span>
                   </div>
                 </div>
               </div>
-
             </div>
 
             {/* Input bar */}
-            <div className="bg-neutral-900 border-t border-white/5 px-4 py-3">
-              <div className="flex items-center gap-2 bg-neutral-800 rounded-lg border border-white/5 px-3 py-2">
-                <button className="text-neutral-600 hover:text-violet-400 transition-colors shrink-0">
-                  <svg className="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32" />
+            <div className="bg-white border-t border-slate-100 px-4 py-3">
+              <div className="flex items-center gap-2.5 bg-white rounded-xl border border-slate-200 shadow-sm px-3 py-2.5 focus-within:border-violet-300 focus-within:ring-2 focus-within:ring-violet-100 transition-all">
+                {/* Attachment */}
+                <button
+                  className="text-slate-300 hover:text-violet-500 transition-colors shrink-0"
+                  title="Attach file"
+                >
+                  <svg
+                    className="size-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32"
+                    />
                   </svg>
                 </button>
-                <span className="flex-1 text-[11px] text-neutral-600 font-mono">Ask about your logs, docs, incidents…</span>
-                <button className="size-5 rounded-md bg-violet-600 flex items-center justify-center hover:bg-violet-500 transition-colors shrink-0">
-                  <svg className="size-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" />
+                <span className="flex-1 text-xs text-slate-300 font-mono">
+                  Ask about your logs, docs, incidents…
+                </span>
+                {/* Divider */}
+                <div className="h-4 w-px bg-slate-100 shrink-0" />
+                {/* Send */}
+                <button className="flex items-center gap-1.5 rounded-lg bg-violet-600 hover:bg-violet-700 px-3 py-1.5 transition-colors shrink-0">
+                  <span className="text-[11px] font-medium text-white">
+                    Send
+                  </span>
+                  <svg
+                    className="size-2.5 text-white"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2.5}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18"
+                    />
                   </svg>
                 </button>
               </div>
@@ -149,20 +223,6 @@ export default function LoginPage() {
           </div>
 
           {/* Metric overlays */}
-          <div className="mt-4 grid grid-cols-4 gap-2">
-            {[
-              { label: 'Latency', value: '142ms', color: 'text-emerald-400' },
-              { label: 'Chunks', value: '1,024', color: 'text-violet-400' },
-              { label: 'Similarity', value: '0.94', color: 'text-amber-400' },
-              { label: 'Tokens', value: '3.2k', color: 'text-sky-400' },
-            ].map(({ label, value, color }) => (
-              <div key={label} className="rounded-lg bg-neutral-800/60 border border-white/5 px-3 py-2 text-center">
-                <p className={`text-sm font-semibold font-mono ${color}`}>{value}</p>
-                <p className="text-[10px] text-neutral-600 mt-0.5">{label}</p>
-              </div>
-            ))}
-          </div>
-
         </div>
       </div>
     </div>
