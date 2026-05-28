@@ -173,7 +173,7 @@ export function ChatPage({ userName }: { userName: string }) {
         </div>
 
         {messages.length === 0 ? (
-          <div className="flex-1 flex flex-col justify-center px-8 pb-16">
+          <div className="flex-1 flex flex-col justify-center px-8 pt-16">
             <div className="w-full max-w-3xl mx-auto">
               <p className="text-sm text-gray-400 mb-2">
                 Hi there,{' '}
@@ -189,7 +189,7 @@ export function ChatPage({ userName }: { userName: string }) {
                 </span>
               </p>
               <h1
-                className="text-3xl font-extrabold leading-[1.1] tracking-tight mb-5"
+                className="text-4xl font-extrabold leading-[1.1] tracking-tight mb-5"
                 style={{
                   background: 'linear-gradient(90deg, #24B1B1, #D946EF)',
                   WebkitBackgroundClip: 'text',
@@ -209,7 +209,7 @@ export function ChatPage({ userName }: { userName: string }) {
                   <button
                     key={i}
                     onClick={() => setInput(suggestion)}
-                    className="p-4 bg-white rounded-xl border border-gray-200 text-left text-sm text-gray-700 hover:border-[#24B1B1]/40 hover:shadow-sm transition-all leading-relaxed h-32 flex flex-col justify-start"
+                    className="p-3.5 bg-white rounded-xl border border-gray-200 text-left text-sm text-gray-700 hover:border-[#24B1B1]/40 hover:shadow-sm transition-all leading-relaxed h-24 flex flex-col justify-start"
                   >
                     {suggestion}
                   </button>
