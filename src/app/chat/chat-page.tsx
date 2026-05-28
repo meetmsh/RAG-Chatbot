@@ -189,7 +189,7 @@ export function ChatPage({ userName }: { userName: string }) {
                 </span>
               </p>
               <h1
-                className="text-4xl font-extrabold leading-[1.1] tracking-tight mb-5"
+                className="text-4xl font-bold leading-[1.1] tracking-tight mb-5"
                 style={{
                   background: 'linear-gradient(90deg, #24B1B1, #D946EF)',
                   WebkitBackgroundClip: 'text',
