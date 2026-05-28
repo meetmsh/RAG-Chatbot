@@ -14,7 +14,14 @@ import {
 } from '@/components/ai-elements/message';
 import { SignoutButton } from '@/components/auth/signout-button';
 import { Spinner as Loader } from '@/components/ui/spinner';
-import { ArrowRight, ImageIcon, Paperclip, PlusIcon, RefreshCw, Search } from 'lucide-react';
+import {
+  ArrowRight,
+  ImageIcon,
+  Paperclip,
+  PlusIcon,
+  RefreshCw,
+  Search,
+} from 'lucide-react';
 
 const SUGGESTION_SETS = [
   [
@@ -47,7 +54,13 @@ const MOCK_THREADS = [
   { id: '7', title: 'Deployment pipeline setup', group: '1 week ago' },
 ];
 
-const THREAD_GROUPS = ['Today', 'Yesterday', '2 days ago', '3 days ago', '1 week ago'];
+const THREAD_GROUPS = [
+  'Today',
+  'Yesterday',
+  '2 days ago',
+  '3 days ago',
+  '1 week ago',
+];
 
 const MAX_CHARS = 1000;
 
@@ -60,7 +73,8 @@ export function ChatPage({ userName }: { userName: string }) {
   const suggestions = SUGGESTION_SETS[suggestionIndex % SUGGESTION_SETS.length];
 
   const submit = () => {
-    if (!input.trim() || status === 'submitted' || status === 'streaming') return;
+    if (!input.trim() || status === 'submitted' || status === 'streaming')
+      return;
     sendMessage({ text: input });
     setInput('');
   };
@@ -84,13 +98,25 @@ export function ChatPage({ userName }: { userName: string }) {
         {/* Logo */}
         <div className="p-5 flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-[#24B1B1] flex items-center justify-center shrink-0">
-            <svg className="size-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            <svg
+              className="size-5 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M13 10V3L4 14h7v7l9-11h-7z"
+              />
             </svg>
           </div>
           <div>
             <div className="font-semibold text-sm leading-tight">NexusAI</div>
-            <div className="text-xs text-gray-400 leading-tight">RAG Assistant</div>
+            <div className="text-xs text-gray-400 leading-tight">
+              RAG Assistant
+            </div>
           </div>
         </div>
 
@@ -123,7 +149,9 @@ export function ChatPage({ userName }: { userName: string }) {
             if (threads.length === 0) return null;
             return (
               <div key={group} className="mb-3">
-                <div className="px-2 py-1 text-xs text-gray-400 font-medium">{group}</div>
+                <div className="px-2 py-1 text-xs text-gray-400 font-medium">
+                  {group}
+                </div>
                 {threads.map((thread) => (
                   <button
                     key={thread.id}
@@ -149,18 +177,31 @@ export function ChatPage({ userName }: { userName: string }) {
             <div className="w-full max-w-3xl mx-auto">
               <p className="text-sm text-gray-400 mb-2">
                 Hi there,{' '}
-                <span style={{ background: 'linear-gradient(90deg, #24B1B1, #D946EF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                <span
+                  style={{
+                    background: 'linear-gradient(90deg, #24B1B1, #D946EF)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                  }}
+                >
                   {firstName}
                 </span>
               </p>
               <h1
-                className="text-6xl font-extrabold leading-[1.1] tracking-tight mb-5"
-                style={{ background: 'linear-gradient(90deg, #24B1B1, #D946EF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
+                className="text-3xl font-extrabold leading-[1.1] tracking-tight mb-5"
+                style={{
+                  background: 'linear-gradient(90deg, #24B1B1, #D946EF)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
               >
                 What would you like to know?
               </h1>
               <p className="text-gray-400 text-sm mb-8">
-                Use one of the most common prompts below or use your own to begin
+                Use one of the most common prompts below or use your own to
+                begin
               </p>
 
               <div className="grid grid-cols-4 gap-3 mb-4">
@@ -216,46 +257,53 @@ export function ChatPage({ userName }: { userName: string }) {
         {/* Input */}
         <div className="px-8 pb-6">
           <div className="max-w-3xl mx-auto">
-          <form
-            onSubmit={handleSubmit}
-            className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden"
-          >
-            <textarea
-              value={input}
-              onChange={(e) => {
-                if (e.target.value.length <= MAX_CHARS) setInput(e.target.value);
-              }}
-              onKeyDown={handleKeyDown}
-              placeholder="Message NexusAI..."
-              className="w-full px-5 pt-5 pb-2 bg-transparent outline-none resize-none text-sm text-gray-700 placeholder:text-gray-400"
-              rows={2}
-            />
-            <div className="flex items-center gap-4 px-4 pb-4 pt-1">
-              <button
-                type="button"
-                className="flex items-center gap-1.5 text-sm text-gray-400/80 hover:text-gray-600 transition-colors"
-              >
-                <Paperclip className="size-3.5" />
-                Add Attachment
-              </button>
-              <button
-                type="button"
-                className="flex items-center gap-1.5 text-sm text-gray-400/80 hover:text-gray-600 transition-colors"
-              >
-                <ImageIcon className="size-3.5" />
-                Use Image
-              </button>
-              <div className="flex-1" />
-              <span className="text-sm text-gray-400">{input.length}/{MAX_CHARS}</span>
-              <button
-                type="submit"
-                disabled={!input.trim() || status === 'submitted' || status === 'streaming'}
-                className="w-9 h-9 rounded-full bg-[#24B1B1] flex items-center justify-center hover:bg-[#1d9c9c] disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
-              >
-                <ArrowRight className="size-4 text-white" />
-              </button>
-            </div>
-          </form>
+            <form
+              onSubmit={handleSubmit}
+              className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden"
+            >
+              <textarea
+                value={input}
+                onChange={(e) => {
+                  if (e.target.value.length <= MAX_CHARS)
+                    setInput(e.target.value);
+                }}
+                onKeyDown={handleKeyDown}
+                placeholder="Message NexusAI..."
+                className="w-full px-5 pt-5 pb-2 bg-transparent outline-none resize-none text-sm text-gray-700 placeholder:text-gray-400"
+                rows={2}
+              />
+              <div className="flex items-center gap-4 px-4 pb-4 pt-1">
+                <button
+                  type="button"
+                  className="flex items-center gap-1.5 text-sm text-gray-400/80 hover:text-gray-600 transition-colors"
+                >
+                  <Paperclip className="size-3.5" />
+                  Add Attachment
+                </button>
+                <button
+                  type="button"
+                  className="flex items-center gap-1.5 text-sm text-gray-400/80 hover:text-gray-600 transition-colors"
+                >
+                  <ImageIcon className="size-3.5" />
+                  Use Image
+                </button>
+                <div className="flex-1" />
+                <span className="text-sm text-gray-400">
+                  {input.length}/{MAX_CHARS}
+                </span>
+                <button
+                  type="submit"
+                  disabled={
+                    !input.trim() ||
+                    status === 'submitted' ||
+                    status === 'streaming'
+                  }
+                  className="w-9 h-9 rounded-full bg-[#24B1B1] flex items-center justify-center hover:bg-[#1d9c9c] disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
+                >
+                  <ArrowRight className="size-4 text-white" />
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       </main>
