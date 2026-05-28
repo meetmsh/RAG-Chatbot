@@ -175,7 +175,7 @@ export function ChatPage({ userName }: { userName: string }) {
         {messages.length === 0 ? (
           <div className="flex-1 flex flex-col justify-center px-8 pt-16">
             <div className="w-full max-w-3xl mx-auto">
-              <p className="text-sm text-gray-400 mb-2">
+              <p className="text-2xl text-gray-400 mb-3">
                 Hi there,{' '}
                 <span
                   style={{
