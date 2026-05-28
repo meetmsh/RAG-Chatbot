@@ -139,47 +139,50 @@ export function ChatPage({ userName }: { userName: string }) {
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 flex flex-col bg-[#f0f0f5] min-w-0">
+      <main className="flex-1 flex flex-col bg-[#f5f5f7] min-w-0 relative">
+        <div className="absolute top-5 right-6 z-10">
+          <SignoutButton />
+        </div>
+
         {messages.length === 0 ? (
-          <div className="flex-1 flex flex-col px-12 py-12">
-            <div className="flex justify-end mb-6">
-              <SignoutButton />
-            </div>
-            <p className="text-sm text-gray-400 mb-1">
-              Hi there,{' '}
-              <span style={{ background: 'linear-gradient(90deg, #24B1B1, #D946EF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-                {firstName}
-              </span>
-            </p>
-            <h1
-              className="text-[3.25rem] font-extrabold leading-[1.1] tracking-tight mb-4"
-              style={{ background: 'linear-gradient(90deg, #24B1B1, #D946EF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
-            >
-              What would you like to know?
-            </h1>
-            <p className="text-gray-500 text-sm mb-8 leading-relaxed">
-              Use one of the most common prompts below or use your own to begin
-            </p>
+          <div className="flex-1 flex flex-col justify-center px-8 pb-16">
+            <div className="w-full max-w-3xl mx-auto">
+              <p className="text-sm text-gray-400 mb-2">
+                Hi there,{' '}
+                <span style={{ background: 'linear-gradient(90deg, #24B1B1, #D946EF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                  {firstName}
+                </span>
+              </p>
+              <h1
+                className="text-6xl font-extrabold leading-[1.1] tracking-tight mb-5"
+                style={{ background: 'linear-gradient(90deg, #24B1B1, #D946EF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
+              >
+                What would you like to know?
+              </h1>
+              <p className="text-gray-400 text-sm mb-8">
+                Use one of the most common prompts below or use your own to begin
+              </p>
 
-            <div className="grid grid-cols-4 gap-4 mb-5 max-w-4xl">
-              {suggestions.map((suggestion, i) => (
-                <button
-                  key={i}
-                  onClick={() => setInput(suggestion)}
-                  className="p-5 bg-white rounded-2xl border border-gray-200 text-left text-sm text-gray-800 hover:border-[#24B1B1]/50 hover:shadow-md transition-all leading-relaxed h-35 flex flex-col justify-start"
-                >
-                  {suggestion}
-                </button>
-              ))}
-            </div>
+              <div className="grid grid-cols-4 gap-3 mb-4">
+                {suggestions.map((suggestion, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setInput(suggestion)}
+                    className="p-4 bg-white rounded-xl border border-gray-200 text-left text-sm text-gray-700 hover:border-[#24B1B1]/40 hover:shadow-sm transition-all leading-relaxed h-32 flex flex-col justify-start"
+                  >
+                    {suggestion}
+                  </button>
+                ))}
+              </div>
 
-            <button
-              onClick={() => setSuggestionIndex((prev) => prev + 1)}
-              className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition-colors w-fit"
-            >
-              <RefreshCw className="size-3.5" />
-              Refresh Prompts
-            </button>
+              <button
+                onClick={() => setSuggestionIndex((prev) => prev + 1)}
+                className="flex items-center gap-2 text-xs text-gray-400 hover:text-gray-600 transition-colors w-fit"
+              >
+                <RefreshCw className="size-3" />
+                Refresh Prompts
+              </button>
+            </div>
           </div>
         ) : (
           <Conversation className="flex-1 px-8 py-6">
@@ -211,7 +214,8 @@ export function ChatPage({ userName }: { userName: string }) {
         )}
 
         {/* Input */}
-        <div className="p-4">
+        <div className="px-8 pb-6">
+          <div className="max-w-3xl mx-auto">
           <form
             onSubmit={handleSubmit}
             className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden"
@@ -252,6 +256,7 @@ export function ChatPage({ userName }: { userName: string }) {
               </button>
             </div>
           </form>
+          </div>
         </div>
       </main>
     </div>
