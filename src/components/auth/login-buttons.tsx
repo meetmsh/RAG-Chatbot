@@ -4,11 +4,17 @@ import { authClient } from '@/lib/auth-client';
 
 export const LoginButtons = () => {
   const handleGitHub = async () => {
-    await authClient.signIn.social({ provider: 'github' });
+    await authClient.signIn.social({
+      provider: 'github',
+      callbackURL: '/login',
+    });
   };
 
   const handleGoogle = async () => {
-    await authClient.signIn.social({ provider: 'google' });
+    await authClient.signIn.social({
+      provider: 'google',
+      callbackURL: '/login',
+    });
   };
   return (
     <div className="mt-10 flex flex-col gap-3">
