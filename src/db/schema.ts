@@ -1,5 +1,14 @@
-import { pgTable, text, boolean, timestamp } from 'drizzle-orm/pg-core';
+import {
+  pgTable,
+  text,
+  boolean,
+  timestamp,
+  serial,
+  vector,
+  index,
+} from 'drizzle-orm/pg-core';
 
+// User's Schema
 export const user = pgTable('user', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
@@ -49,3 +58,37 @@ export const verification = pgTable('verification', {
   createdAt: timestamp('created_at'),
   updatedAt: timestamp('updated_at'),
 });
+
+// User's Documents Schema
+export const documents = pgTable(
+  'documents',
+  {
+    id: serial('id').primaryKey(),
+    userId: text('userId')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    content: text('content').notNull(),
+    embedding: vector('embedding', { dimensions: 15636 }),
+  },
+  (table) => [
+    index('embeddingIndex').using(
+      'hnsw',
+      table.embedding.op('vector_cosine_ops'),
+    ),
+  ],
+);
+
+export type InsertUser = typeof user.$inferInsert;
+export type SelectUser = typeof user.$inferSelect;
+
+export type InsertSession = typeof session.$inferInsert;
+export type SelectSession = typeof session.$inferSelect;
+
+export type InsertAccount = typeof account.$inferInsert;
+export type SelectAccount = typeof account.$inferSelect;
+
+export type InsertVerification = typeof verification.$inferInsert;
+export type SelectVerification = typeof verification.$inferSelect;
+
+export type InsertDocument = typeof documents.$inferInsert;
+export type SelectDocument = typeof documents.$inferSelect;
