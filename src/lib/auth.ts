@@ -8,7 +8,7 @@ export const auth = betterAuth({
     provider: 'pg',
   }),
   pages: {
-    signIn: '/login',
+    signIn: '/',
   },
   socialProviders: {
     github: {

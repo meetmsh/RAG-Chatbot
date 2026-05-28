@@ -11,7 +11,7 @@ export const LoginButtons = () => {
     setLoading('github');
     await authClient.signIn.social({
       provider: 'github',
-      callbackURL: '/login',
+      callbackURL: '/',
     });
     setLoading(null);
   };
@@ -20,7 +20,7 @@ export const LoginButtons = () => {
     setLoading('google');
     await authClient.signIn.social({
       provider: 'google',
-      callbackURL: '/login',
+      callbackURL: '/',
     });
     setLoading(null);
   };
