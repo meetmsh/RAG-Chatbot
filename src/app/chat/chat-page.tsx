@@ -124,7 +124,7 @@ export function ChatPage({ userName }: { userName: string }) {
         <div className="px-4 pb-3">
           <button
             onClick={() => setMessages([])}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#24B1B1]/10 text-[#24B1B1] text-sm font-medium hover:bg-[#24B1B1]/20 transition-colors"
+            className="w-full flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm text-gray-500 hover:bg-black/4 hover:text-gray-800 transition-colors"
           >
             <PlusIcon className="size-4" />
             New Chat
