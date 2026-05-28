@@ -22,6 +22,7 @@ import {
   PromptInputTools,
 } from '@/components/ai-elements/prompt-input';
 import { Spinner as Loader } from '@/components/ui/spinner';
+import { SignoutButton } from '@/components/auth/signout-button';
 
 export default function RAGChatBot() {
   const [input, setInput] = useState('');
@@ -35,6 +36,7 @@ export default function RAGChatBot() {
 
   return (
     <div className="max-w-4xl mx-auto p-6 relative size-full h-[calc(100vh)]">
+      <SignoutButton />
       <div className="flex flex-col h-full">
         {/* Chat Window  */}
         <Conversation className="h-full">
