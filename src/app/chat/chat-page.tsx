@@ -88,7 +88,7 @@ export function ChatPage({ userName }: { userName: string }) {
   return (
     <div className="flex h-screen bg-white dark:bg-[var(--app-bg)]">
       {/* Sidebar */}
-      <aside className="w-85 shrink-0 flex flex-col border-r border-gray-200 bg-white dark:border-[var(--app-border)] dark:bg-[var(--app-bg-sidebar)]">
+      <aside className="w-64 shrink-0 flex flex-col border-r border-gray-200 bg-white dark:border-[var(--app-border)] dark:bg-[var(--app-bg-sidebar)]">
         {/* Logo */}
         <div className="p-5 flex items-center gap-3">
           <div>
