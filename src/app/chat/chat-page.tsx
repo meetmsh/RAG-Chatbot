@@ -1,6 +1,7 @@
 'use client';
 
 import { useChat } from '@ai-sdk/react';
+import { motion } from 'motion/react';
 import { Fragment, useState } from 'react';
 import {
   Conversation,
@@ -146,16 +147,31 @@ export function ChatPage({ userName }: { userName: string }) {
         {messages.length === 0 ? (
           <div className="relative z-10 flex-1 flex flex-col justify-center px-8 pt-16">
             <div className="w-full max-w-3xl mx-auto">
-              <p className="text-2xl text-gray-400 mb-3 dark:text-[var(--app-text)] dark:font-semibold">
+              <motion.p
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, ease: 'easeOut' }}
+                className="text-2xl text-gray-400 mb-3 dark:text-[var(--app-text)] dark:font-semibold"
+              >
                 Hi there, <span className="greeting-name">{firstName}</span>
-              </p>
-              <h1 className="accent-text text-4xl font-bold leading-[1.1] tracking-tight mb-5">
+              </motion.p>
+              <motion.h1
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, ease: 'easeOut', delay: 0.1 }}
+                className="accent-text text-4xl font-bold leading-[1.1] tracking-tight mb-5"
+              >
                 What would you like to know?
-              </h1>
-              <p className="text-gray-400 text-sm mb-8 dark:text-[var(--app-text-dim)]">
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, ease: 'easeOut', delay: 0.2 }}
+                className="text-gray-400 text-sm mb-8 dark:text-[var(--app-text-dim)]"
+              >
                 Use one of the most common prompts below or use your own to
                 begin
-              </p>
+              </motion.p>
 
               <div className="grid grid-cols-4 gap-3 mb-4">
                 {suggestions.map((suggestion, i) => (
