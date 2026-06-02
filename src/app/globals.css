@@ -141,10 +141,10 @@
 
 .dark {
   --app-bg: #0a0f1e;
-  --app-bg-sidebar: #080b16;
-  --app-surface: #141b2e;
-  --app-surface-hover: #1d2742;
-  --app-border: rgba(255, 255, 255, 0.07);
+  --app-bg-sidebar: #0e1626;
+  --app-surface: #151d33;
+  --app-surface-hover: #1e2843;
+  --app-border: rgba(130, 160, 225, 0.1);
   --app-text: #ececf1;
   --app-text-muted: #9aa3b8;
   --app-text-dim: #5d6478;
