@@ -267,9 +267,9 @@ export function ChatPage({ userName }: { userName: string }) {
                     status === 'submitted' ||
                     status === 'streaming'
                   }
-                  className="w-9 h-9 rounded-full bg-[#24B1B1] flex items-center justify-center hover:bg-[#1d9c9c] disabled:opacity-40 disabled:cursor-not-allowed transition-all shrink-0 dark:bg-none dark:[background:var(--app-accent-gradient)] dark:disabled:opacity-45 dark:enabled:hover:scale-105"
+                  className="w-9 h-9 rounded-full border border-zinc-700 bg-[#0a1120] text-zinc-100 flex items-center justify-center hover:border-zinc-600 disabled:cursor-not-allowed disabled:border-transparent disabled:bg-transparent disabled:text-zinc-500 disabled:hover:border-transparent transition-all shrink-0"
                 >
-                  <ArrowRight className="size-4 text-white" />
+                  <ArrowRight className="size-4" />
                 </button>
               </div>
             </form>
