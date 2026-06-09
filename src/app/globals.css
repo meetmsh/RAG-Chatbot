@@ -211,10 +211,8 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* Composer focus glow (dark only) */
+/* Composer focus border (dark only) */
 .dark .composer:focus-within {
-  border-color: rgba(56, 212, 197, 0.55);
-  box-shadow:
-    0 0 0 1px rgba(56, 212, 197, 0.35),
-    0 0 22px -4px rgba(56, 212, 197, 0.4);
+  border-color: rgba(130, 160, 225, 0.2);
+  box-shadow: none;
 }
