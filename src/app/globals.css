@@ -140,120 +140,67 @@
 }
 
 .dark {
-  /* ── Espresso Bronze palette (source of truth) ───────────────── */
-  /* Backgrounds — 3 depth levels */
-  --bg-sidebar:        #171210;   /* deepest: sidebar, app frame */
-  --bg-main:           #1e1814;   /* main chat area */
-  --bg-surface:        #28201b;   /* cards, input box, hover rows */
-  --bg-surface-hover:  #322822;   /* hover state on cards/threads */
-
-  /* Accent — copper. Namespaced --copper* (NOT --accent) to avoid
-     clobbering shadcn's reserved --accent token, which drives
-     focus/hover fills across the UI component library. */
-  --copper:            #e8a87c;   /* send button, active thread, links, focus */
-  --copper-hover:      #f0bc96;   /* accent hover */
-  --copper-on:         #2a1608;   /* text/icons ON copper backgrounds */
-  --copper-subtle:     rgba(232, 168, 124, 0.12);  /* active-thread bg tint */
-
-  /* Text */
-  --text-primary:      #f3ede7;   /* headings, user input */
-  --text-secondary:    #b5a99e;   /* descriptions, timestamps */
-  --text-muted:        #7d726a;   /* placeholders, char counter */
-
-  /* Borders */
-  --border-default:    #3d322a;   /* card/input borders */
-  --border-strong:     #54453a;   /* hover borders */
-
-  /* Semantic (kept neutral, not copper) */
-  --success: #6fbf8e;
-  --danger:  #e07a6b;
-  --warning: #e5b95c;
-
-  /* ── Aliases consumed by existing components ─────────────────── */
-  --app-bg:            var(--bg-main);
-  --app-bg-sidebar:    var(--bg-sidebar);
-  --app-surface:       var(--bg-surface);
-  --app-surface-hover: var(--bg-surface-hover);
-  --app-border:        var(--border-default);
-  --app-text:          var(--text-primary);
-  --app-text-muted:    var(--text-secondary);
-  --app-text-dim:      var(--text-muted);
-  --app-teal:          var(--copper);
-  --app-accent-gradient: var(--copper);
+  --app-bg: #0a0f1e;
+  --app-bg-sidebar: #0e1626;
+  --app-surface: #151d33;
+  --app-surface-hover: #1e2843;
+  --app-border: rgba(130, 160, 225, 0.1);
+  --app-text: #ececf1;
+  --app-text-muted: #9aa3b8;
+  --app-text-dim: #5d6478;
+  --app-teal: #38d4c5;
+  --app-accent-gradient: linear-gradient(100deg, #38d4c5, #4da6f0 48%, #a47cf6);
 }
 
-/* ───────────────────────────────────────────────────────────
-   Hero block — copper-fade treatment. Dark uses the cream→copper
-   gradient per spec; light keeps its teal→fuchsia gradient and
-   muted-gray support text (the spec's cream/copper tones are
-   near-invisible / clashing on the light background).
-   ─────────────────────────────────────────────────────────── */
-.hero-eyebrow {
-  font-size: 14px;
-  font-weight: 500;
-  color: #6b7280; /* light: muted gray (copper is too low-contrast on light) */
-  letter-spacing: 0.02em;
-  margin: 0 0 10px;
-}
-.dark .hero-eyebrow {
-  color: var(--copper); /* #e8a87c */
-}
-
-.hero-heading {
-  font-size: clamp(32px, 4.5vw, 44px); /* 32px mobile → 44px desktop */
-  font-weight: 600;
-  line-height: 1.12;
-  letter-spacing: -0.02em;
-  margin: 0 0 12px;
-
-  /* light: existing teal→fuchsia gradient */
+/* Headline / accent text — gradient clipped to the glyphs */
+.accent-text {
   background: var(--app-accent-gradient);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  color: var(--app-teal); /* fallback if clip unsupported */
-  /* entrance handled by motion/react (useReducedMotion-aware) */
+  color: transparent;
 }
-.dark .hero-heading {
-  /* the gradient — cream melting into copper */
-  background: linear-gradient(92deg, #f3ede7 0%, #e8a87c 60%, #c77b4a 100%);
+
+/* Greeting name — gradient in light, solid teal in dark */
+.greeting-name {
+  background: var(--app-accent-gradient);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  color: var(--text-primary); /* #f3ede7 fallback */
+  color: transparent;
+}
+.dark .greeting-name {
+  background: none;
+  -webkit-text-fill-color: var(--app-text);
+  color: var(--app-text);
 }
 
-.hero-subtext {
-  font-size: 14px;
-  color: #6b7280; /* light: muted gray */
-  margin: 0 0 28px;
-  /* entrance handled by motion/react (useReducedMotion-aware) */
-}
-.dark .hero-subtext {
-  color: var(--text-secondary); /* #b5a99e */
+/* Dark headline — solid white greeting + muted question, no gradient */
+.dark .accent-text {
+  background: none;
+  -webkit-text-fill-color: var(--app-text-muted);
+  color: var(--app-text-muted);
 }
 
-/* Send button fill follows the accent */
+/* Send button fill follows the accent gradient */
 .accent-fill {
   background: var(--app-accent-gradient);
 }
 
-/* Active thread row — copper bg tint, copper text, 2px left edge */
+/* Active thread row — 3px gradient bar on the left edge */
 .thread-active {
-  background: var(--copper-subtle);
-  color: var(--copper);
-  box-shadow: inset 2px 0 0 0 var(--copper);
+  background: var(--app-surface-hover);
+  box-shadow: inset 3px 0 0 0 var(--app-teal);
 }
 
-/* Atmosphere — warm espresso vertical gradient fading to the base.
-   Rendered dark-only (hidden dark:block) so these tones are the
-   dark backdrop. */
+/* Atmosphere — smooth vertical navy gradient: brighter navy at the top
+   fading to the deep navy base at the bottom (matches reference) */
 .app-atmosphere {
   background: linear-gradient(
     180deg,
-    #2a211c 0%,
-    #241c18 30%,
-    #201915 60%,
+    #2a3556 0%,
+    #1d2744 28%,
+    #121a32 58%,
     var(--app-bg) 100%
   );
 }
@@ -264,8 +211,8 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* Composer focus border (dark only) — accent border + subtle ring */
+/* Composer focus border (dark only) */
 .dark .composer:focus-within {
-  border-color: var(--copper);
-  box-shadow: 0 0 0 3px var(--copper-subtle);
+  border-color: rgba(130, 160, 225, 0.2);
+  box-shadow: none;
 }

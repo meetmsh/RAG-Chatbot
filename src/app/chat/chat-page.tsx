@@ -1,7 +1,7 @@
 'use client';
 
 import { useChat } from '@ai-sdk/react';
-import { motion, useReducedMotion } from 'motion/react';
+import { motion } from 'motion/react';
 import { Fragment, useState } from 'react';
 import {
   Conversation,
@@ -66,22 +66,6 @@ export function ChatPage({ userName }: { userName: string }) {
 
   const firstName = userName?.split(' ')[0] ?? 'there';
   const suggestions = SUGGESTION_SETS[suggestionIndex % SUGGESTION_SETS.length];
-
-  const prefersReducedMotion = useReducedMotion();
-  // Staggered entrance matching the hero spec (8px rise, 500ms, easeOutExpo-ish).
-  // Returns nothing when the user prefers reduced motion, so elements render static.
-  const heroMotion = (delay: number) =>
-    prefersReducedMotion
-      ? undefined
-      : {
-          initial: { opacity: 0, y: 8 },
-          animate: { opacity: 1, y: 0 },
-          transition: {
-            duration: 0.5,
-            ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
-            delay,
-          },
-        };
 
   const submit = () => {
     if (!input.trim() || status === 'submitted' || status === 'streaming')
@@ -163,17 +147,31 @@ export function ChatPage({ userName }: { userName: string }) {
         {messages.length === 0 ? (
           <div className="relative z-10 flex-1 flex flex-col justify-center px-8 pt-16">
             <div className="w-full max-w-3xl mx-auto">
-              <div className="hero">
-                <motion.p className="hero-eyebrow" {...heroMotion(0)}>
-                  Hi there, {firstName}
-                </motion.p>
-                <motion.h1 className="hero-heading" {...heroMotion(0.08)}>
-                  What would you like to know?
-                </motion.h1>
-                <motion.p className="hero-subtext" {...heroMotion(0.16)}>
-                  Pick a starting point below, or just start typing.
-                </motion.p>
-              </div>
+              <motion.p
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, ease: 'easeOut' }}
+                className="text-2xl text-gray-400 mb-3 dark:text-[var(--app-text)] dark:font-semibold"
+              >
+                Hi there, <span className="greeting-name">{firstName}</span>
+              </motion.p>
+              <motion.h1
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, ease: 'easeOut', delay: 0.1 }}
+                className="accent-text text-4xl font-bold leading-[1.1] tracking-tight mb-5"
+              >
+                What would you like to know?
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, ease: 'easeOut', delay: 0.2 }}
+                className="text-gray-400 text-sm mb-8 dark:text-[var(--app-text-dim)]"
+              >
+                Use one of the most common prompts below or use your own to
+                begin
+              </motion.p>
 
               <div className="grid grid-cols-4 gap-3 mb-4">
                 {suggestions.map((suggestion, i) => (
@@ -269,7 +267,7 @@ export function ChatPage({ userName }: { userName: string }) {
                     status === 'submitted' ||
                     status === 'streaming'
                   }
-                  className="w-9 h-9 rounded-full border border-zinc-700 bg-[#0a1120] text-zinc-100 flex items-center justify-center hover:border-zinc-600 disabled:cursor-not-allowed disabled:border-transparent disabled:bg-transparent disabled:text-zinc-500 disabled:hover:border-transparent transition-all shrink-0 dark:border-transparent dark:bg-(--copper) dark:text-(--copper-on) dark:hover:border-transparent dark:hover:bg-(--copper-hover) dark:disabled:bg-(--bg-surface-hover) dark:disabled:text-(--text-muted)"
+                  className="w-9 h-9 rounded-full border border-zinc-700 bg-[#0a1120] text-zinc-100 flex items-center justify-center hover:border-zinc-600 disabled:cursor-not-allowed disabled:border-transparent disabled:bg-transparent disabled:text-zinc-500 disabled:hover:border-transparent transition-all shrink-0"
                 >
                   <ArrowRight className="size-4" />
                 </button>
