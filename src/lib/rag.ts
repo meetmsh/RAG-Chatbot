@@ -110,12 +110,19 @@ export async function retrieveChunks(
     .limit(TOP_K);
 }
 
+/**
+ * The assistant answers general questions as well as questions about uploaded
+ * documents, so the prompt has two shapes. When retrieval finds nothing the
+ * model behaves like an ordinary assistant rather than apologising about an
+ * empty knowledge base, which would be noise on a question that was never
+ * about documents in the first place.
+ */
 export function buildContextPrompt(retrieved: RetrievedChunk[]) {
   if (retrieved.length === 0) {
     return [
-      'You are a retrieval-augmented assistant.',
-      'No documents in the knowledge base matched this question.',
-      'Tell the user you could not find anything relevant in their uploaded documents, then answer from general knowledge only if it is clearly useful, and say that you are doing so.',
+      'You are a helpful assistant with access to a personal document library.',
+      'Nothing in the library was relevant to this message, so answer it normally from your own knowledge.',
+      'Do not mention the document library unless the user is clearly asking about their uploaded documents, in which case say you could not find anything matching.',
     ].join('\n');
   }
 
@@ -127,9 +134,10 @@ export function buildContextPrompt(retrieved: RetrievedChunk[]) {
     .join('\n\n');
 
   return [
-    'You are a retrieval-augmented assistant. Answer using the numbered context below.',
-    'Cite the sources you use inline with their bracketed number, for example [1].',
-    'If the context does not contain the answer, say so plainly instead of guessing.',
+    'You are a helpful assistant with access to a personal document library.',
+    "The numbered context below was retrieved from the user's documents because it matched their message.",
+    'Prefer it over your own knowledge and cite what you use inline with its bracketed number, for example [1].',
+    'If the context turns out not to answer the question, say so and then answer from general knowledge, making clear which part came from where.',
     '',
     'Context:',
     context,

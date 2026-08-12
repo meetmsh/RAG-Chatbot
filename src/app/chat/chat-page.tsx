@@ -22,27 +22,30 @@ import { SignoutButton } from '@/components/auth/signout-button';
 import { DocumentPanel } from '@/components/documents/document-panel';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Spinner as Loader } from '@/components/ui/spinner';
+import { APP_NAME } from '@/lib/app-config';
 import type { RagUIMessage } from '@/lib/chat-types';
 import { ArrowRight, PlusIcon, RefreshCw } from 'lucide-react';
 
+// Each set pairs general assistant prompts with document-grounded ones, since
+// the assistant handles both.
 const SUGGESTION_SETS = [
   [
     'Summarise the main points of my uploaded documents',
+    'Explain how vector embeddings work in simple terms',
     'What are the key risks mentioned in my documents?',
-    'List every date or deadline you can find',
-    'What questions do my documents leave unanswered?',
+    'Write a polite follow-up email after an interview',
   ],
   [
-    'Compare what my documents say about costs',
-    'Who are the people named across my documents?',
-    'Pull out any numbers or figures worth noting',
-    'Explain the most technical section in plain English',
+    'List every date or deadline you can find in my documents',
+    'Help me brainstorm names for a side project',
+    'Pull out the numbers and figures worth noting',
+    'What are the best practices for REST API design?',
   ],
   [
     'Give me a timeline of events from my documents',
-    'What decisions still need to be made?',
-    'Draft a short brief based on what I uploaded',
+    'Explain the difference between SQL and NoSQL databases',
     'Which claims in my documents lack supporting detail?',
+    'Draft a short cover letter for a developer role',
   ],
 ];
 
@@ -84,7 +87,7 @@ export function ChatPage({ userName }: { userName: string }) {
         <div className="p-5 flex items-center gap-3">
           <div>
             <div className="text-xs text-gray-400 leading-tight dark:text-[var(--app-text-dim)]">
-              RAG Assistant
+              {APP_NAME}
             </div>
           </div>
         </div>
@@ -234,7 +237,7 @@ export function ChatPage({ userName }: { userName: string }) {
                     setInput(e.target.value);
                 }}
                 onKeyDown={handleKeyDown}
-                placeholder="Message NexusAI..."
+                placeholder={`Message ${APP_NAME}...`}
                 className="w-full px-5 pt-5 pb-2 bg-transparent outline-none resize-none text-sm text-gray-700 placeholder:text-gray-400 dark:text-[var(--app-text)] dark:placeholder:text-[var(--app-text-dim)]"
                 rows={2}
               />

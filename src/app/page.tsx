@@ -1,4 +1,5 @@
 import { LoginButtons } from '@/components/auth/login-buttons';
+import { APP_NAME } from '@/lib/app-config';
 import { getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 
@@ -24,10 +25,15 @@ export default async () => {
         <div className="absolute -bottom-10 -left-10 size-44 rounded-full bg-black/[0.07] blur-2xl" />
 
         <div className="relative z-10 mx-auto w-full max-w-sm flex flex-col gap-4 lg:gap-8">
-          <h2 className="text-3xl font-bold leading-tight tracking-tight lg:text-5xl lg:leading-[1.12] lg:tracking-[-0.02em]">
-            <span className="text-white">Ask your documents </span>
-            <span className="text-[#7288AE]">anything</span>
-          </h2>
+          <div className="flex flex-col gap-3 lg:gap-5">
+            <span className="text-xs font-semibold tracking-[0.2em] text-white/70 uppercase">
+              {APP_NAME}
+            </span>
+            <h2 className="text-3xl font-bold leading-tight tracking-tight lg:text-5xl lg:leading-[1.12] lg:tracking-[-0.02em]">
+              <span className="text-white">Ask your documents </span>
+              <span className="text-[#7288AE]">anything</span>
+            </h2>
+          </div>
 
           <div className="flex flex-col gap-3 lg:gap-6">
             <div className="flex flex-col gap-0.5 border-l-2 border-white/50 pl-4">

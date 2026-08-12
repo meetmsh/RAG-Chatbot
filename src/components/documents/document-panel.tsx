@@ -3,6 +3,7 @@
 import { FileText, Loader2, Trash2, Upload } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { DocumentSummary } from '@/lib/chat-types';
+import { ACCEPTED_UPLOAD_TYPES } from '@/lib/extract-text';
 
 function formatSize(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
@@ -75,7 +76,7 @@ export function DocumentPanel() {
         <input
           ref={inputRef}
           type="file"
-          accept=".txt,.md,.markdown,.csv,.json,text/plain,text/markdown,text/csv,application/json"
+          accept={ACCEPTED_UPLOAD_TYPES}
           className="hidden"
           onChange={(e) => {
             const file = e.target.files?.[0];
@@ -108,7 +109,7 @@ export function DocumentPanel() {
       <div className="min-h-0 flex-1 overflow-y-auto px-3">
         {documents.length === 0 ? (
           <p className="px-2 py-4 text-xs leading-relaxed text-gray-400 dark:text-[var(--app-text-dim)]">
-            No documents yet. Upload a .txt, .md, .csv, or .json file and ask
+            No documents yet. Upload a PDF, DOCX, TXT, or MD file and ask
             questions about it.
           </p>
         ) : (

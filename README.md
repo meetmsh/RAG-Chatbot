@@ -1,8 +1,8 @@
 # RAGChat
 
-A retrieval-augmented chat application. Upload documents, ask questions about
-them, and get answers grounded in the retrieved text with the source chunks
-shown alongside the response.
+A chat application that answers general questions and, when you ask about your
+own documents, retrieves the relevant passages first and grounds the answer in
+them with the source chunks shown alongside the response.
 
 Built with Next.js 16 (App Router), the Vercel AI SDK v6, Drizzle ORM, and
 Postgres with pgvector on Neon.
@@ -13,27 +13,41 @@ Postgres with pgvector on Neon.
 Upload                                  Query
   |                                       |
   v                                       v
-file (.txt/.md/.csv/.json)          user question
+PDF / DOCX / TXT / MD               user question
   |                                       |
   v                                       v
-RecursiveCharacterTextSplitter      embed query
-1000 chars, 200 overlap             (text-embedding-3-small)
+extract text                        embed query
+(unpdf / mammoth / raw)             (text-embedding-3-small)
   |                                       |
   v                                       v
-embed each chunk (batched)          cosine similarity search
-  |                                    scoped to userId
-  v                                    HNSW index, top 5,
-chunks table                         similarity > 0.3
-vector(1536) + HNSW index                 |
-                                          v
-                                  inject chunks into system prompt
-                                          |
-                                          v
-                                  gpt-4.1-mini streams the answer
-                                  sources stream first, then text
+RecursiveCharacterTextSplitter      cosine similarity search
+1000 chars, 200 overlap               scoped to userId
+  |                                     HNSW index, top 5,
+  v                                     similarity > 0.3
+embed each chunk (batched)                |
+  |                                       v
+  v                                 any matches?
+chunks table                         /          \
+vector(1536) + HNSW index         yes            no
+                                   |              |
+                                   v              v
+                            ground in       answer as a
+                            context and     general assistant
+                            cite [1], [2]         |
+                                   \             /
+                                    v           v
+                              gpt-4.1-mini streams the answer
+                              sources stream first, then text
 ```
 
 ### Ingestion
+
+Text is extracted per format before anything else: `unpdf` for PDF, `mammoth`
+for DOCX, and a direct read for plain text. Both parsers are imported lazily so
+the PDF.js bundle only loads when a PDF actually arrives. Formats we cannot
+read are rejected up front rather than chunked and embedded as binary noise,
+and a PDF that extracts to nothing (a scan with no text layer) is reported as
+needing OCR instead of being stored empty.
 
 A document is split before it is embedded because an embedding is a
 fixed-size vector: the longer the text behind it, the more meaning gets
@@ -61,9 +75,12 @@ documents can never ground another user's answer.
 
 ### Generation
 
-The retrieved chunks are numbered and placed in the system prompt, with an
-instruction to cite them inline as `[1]`, `[2]`, and to say plainly when the
-context does not contain the answer.
+The assistant handles general questions as well as document questions, so the
+system prompt has two shapes. When chunks come back they are numbered and
+placed in the prompt with an instruction to prefer them and cite them inline as
+`[1]`, `[2]`. When retrieval returns nothing the model is told to answer
+normally and to stay quiet about the document library, so asking it to explain
+a REST API does not produce an apology about an empty knowledge base.
 
 The response is a `createUIMessageStream`: a custom `data-sources` part is
 written first so the UI can render the citations immediately, then the model's
@@ -133,9 +150,9 @@ npm run dev
 
 ## Limitations
 
-- Only plain text formats are accepted (`.txt`, `.md`, `.csv`, `.json`).
-  PDF and DOCX need a parser and are rejected rather than ingested as garbage.
-- Uploads are capped at 2MB and processed synchronously in the request, so a
+- Accepted formats are PDF, DOCX, TXT, and MD. Scanned PDFs have no text layer
+  and would need OCR, which is not supported.
+- Uploads are capped at 10MB and processed synchronously in the request, so a
   large file blocks its own response. A queue would be the next step.
 - Conversations are not persisted; a reload starts a new chat.
 - Retrieval is pure vector search. A reranking pass or hybrid keyword search
