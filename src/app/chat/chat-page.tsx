@@ -13,56 +13,46 @@ import {
   MessageContent,
   MessageResponse as Response,
 } from '@/components/ai-elements/message';
+import {
+  Sources,
+  SourcesContent,
+  SourcesTrigger,
+} from '@/components/ai-elements/sources';
 import { SignoutButton } from '@/components/auth/signout-button';
+import { DocumentPanel } from '@/components/documents/document-panel';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Spinner as Loader } from '@/components/ui/spinner';
-import {
-  ArrowRight,
-  ImageIcon,
-  Paperclip,
-  PlusIcon,
-  RefreshCw,
-  Search,
-} from 'lucide-react';
+import type { RagUIMessage } from '@/lib/chat-types';
+import { ArrowRight, PlusIcon, RefreshCw } from 'lucide-react';
 
 const SUGGESTION_SETS = [
   [
-    'Write a to-do list for a personal project or task',
-    'Generate an email reply to a job offer',
-    'Summarise this article or text for me in one paragraph',
-    'How does AI work in a technical capacity',
+    'Summarise the main points of my uploaded documents',
+    'What are the key risks mentioned in my documents?',
+    'List every date or deadline you can find',
+    'What questions do my documents leave unanswered?',
   ],
   [
-    'Explain the difference between machine learning and AI',
-    'Write a cover letter for a software engineer role',
-    'Summarise the key points of a business meeting',
-    'What are the best practices for REST API design',
+    'Compare what my documents say about costs',
+    'Who are the people named across my documents?',
+    'Pull out any numbers or figures worth noting',
+    'Explain the most technical section in plain English',
   ],
   [
-    'Help me brainstorm names for a startup',
-    'Draft a polite follow-up email after an interview',
-    'Explain quantum computing in simple terms',
-    'What are the pros and cons of remote work',
+    'Give me a timeline of events from my documents',
+    'What decisions still need to be made?',
+    'Draft a short brief based on what I uploaded',
+    'Which claims in my documents lack supporting detail?',
   ],
 ];
-
-const MOCK_THREADS = [
-  { id: '1', title: 'Project architecture discussion', group: 'Today' },
-  { id: '2', title: 'API integration help', group: 'Today' },
-  { id: '3', title: 'Database schema review', group: 'Yesterday' },
-  { id: '4', title: 'Performance optimization', group: 'Yesterday' },
-  { id: '5', title: 'Authentication flow', group: '2 days ago' },
-  { id: '6', title: 'UI component library', group: '3 days ago' },
-  { id: '7', title: 'Deployment pipeline setup', group: '1 week ago' },
-];
-
 
 const MAX_CHARS = 1000;
 
 export function ChatPage({ userName }: { userName: string }) {
   const [input, setInput] = useState('');
   const [suggestionIndex, setSuggestionIndex] = useState(0);
-  const { messages, sendMessage, status, setMessages } = useChat();
+  const { messages, sendMessage, status, setMessages } =
+    useChat<RagUIMessage>();
 
   const firstName = userName?.split(' ')[0] ?? 'there';
   const suggestions = SUGGESTION_SETS[suggestionIndex % SUGGESTION_SETS.length];
@@ -110,28 +100,8 @@ export function ChatPage({ userName }: { userName: string }) {
           </button>
         </div>
 
-        {/* Search */}
-        <div className="px-4 pb-4">
-          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100 dark:bg-[var(--app-surface)] dark:border dark:border-[var(--app-border)]">
-            <Search className="size-4 text-gray-400 shrink-0 dark:text-[var(--app-text-dim)]" />
-            <input
-              placeholder="Search threads..."
-              className="bg-transparent text-sm outline-none flex-1 text-gray-600 placeholder:text-gray-400 dark:text-[var(--app-text)] dark:placeholder:text-[var(--app-text-dim)]"
-            />
-          </div>
-        </div>
-
-        {/* Thread list */}
-        <div className="flex-1 overflow-y-auto px-3">
-          {MOCK_THREADS.map((thread) => (
-            <button
-              key={thread.id}
-              className="w-full text-left px-2 py-2 rounded-lg hover:bg-black/4 text-sm text-gray-600 hover:text-gray-900 truncate transition-colors dark:text-[var(--app-text-muted)] dark:hover:bg-[var(--app-surface-hover)] dark:hover:text-[var(--app-text)]"
-            >
-              {thread.title}
-            </button>
-          ))}
-        </div>
+        {/* Knowledge base */}
+        <DocumentPanel />
       </aside>
 
       {/* Main content */}
@@ -211,6 +181,33 @@ export function ChatPage({ userName }: { userName: string }) {
                             </Message>
                           </Fragment>
                         );
+                      case 'data-sources':
+                        return part.data.length === 0 ? null : (
+                          <Sources key={`${message.id}-${i}`} className="px-1">
+                            <SourcesTrigger count={part.data.length} />
+                            <SourcesContent>
+                              {part.data.map((source) => (
+                                <div
+                                  key={source.chunkId}
+                                  className="max-w-2xl rounded-lg border border-gray-200 bg-white p-3 dark:border-[var(--app-border)] dark:bg-[var(--app-surface)]"
+                                >
+                                  <div className="mb-1 flex items-center gap-2">
+                                    <span className="font-medium text-gray-700 dark:text-[var(--app-text)]">
+                                      [{source.index}] {source.documentTitle}
+                                    </span>
+                                    <span className="text-gray-400 dark:text-[var(--app-text-dim)]">
+                                      {Math.round(source.similarity * 100)}%
+                                      match
+                                    </span>
+                                  </div>
+                                  <p className="line-clamp-3 leading-relaxed text-gray-500 dark:text-[var(--app-text-muted)]">
+                                    {source.snippet}
+                                  </p>
+                                </div>
+                              ))}
+                            </SourcesContent>
+                          </Sources>
+                        );
                       default:
                         return null;
                     }
@@ -242,20 +239,9 @@ export function ChatPage({ userName }: { userName: string }) {
                 rows={2}
               />
               <div className="flex items-center gap-4 px-4 pb-4 pt-1">
-                <button
-                  type="button"
-                  className="flex items-center gap-1.5 text-sm text-gray-400/80 hover:text-gray-600 transition-colors dark:text-[var(--app-text-dim)] dark:hover:text-[var(--app-text-muted)]"
-                >
-                  <Paperclip className="size-3.5" />
-                  Add Attachment
-                </button>
-                <button
-                  type="button"
-                  className="flex items-center gap-1.5 text-sm text-gray-400/80 hover:text-gray-600 transition-colors dark:text-[var(--app-text-dim)] dark:hover:text-[var(--app-text-muted)]"
-                >
-                  <ImageIcon className="size-3.5" />
-                  Use Image
-                </button>
+                <span className="text-sm text-gray-400/80 dark:text-[var(--app-text-dim)]">
+                  Answers are grounded in your uploaded documents
+                </span>
                 <div className="flex-1" />
                 <span className="text-sm text-gray-400 dark:text-[var(--app-text-dim)]">
                   {input.length}/{MAX_CHARS}

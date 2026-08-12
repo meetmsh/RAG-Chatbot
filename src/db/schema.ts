@@ -4,6 +4,7 @@ import {
   boolean,
   timestamp,
   serial,
+  integer,
   vector,
   index,
 } from 'drizzle-orm/pg-core';
@@ -67,14 +68,37 @@ export const documents = pgTable(
     userId: text('userId')
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    mediaType: text('media_type').notNull(),
+    byteSize: integer('byte_size').notNull(),
+    chunkCount: integer('chunk_count').notNull().default(0),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (table) => [index('documentsUserIdIndex').on(table.userId)],
+);
+
+// Chunks are the unit of retrieval. One document fans out into many.
+export const chunks = pgTable(
+  'chunks',
+  {
+    id: serial('id').primaryKey(),
+    documentId: integer('document_id')
+      .notNull()
+      .references(() => documents.id, { onDelete: 'cascade' }),
+    userId: text('userId')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    chunkIndex: integer('chunk_index').notNull(),
     content: text('content').notNull(),
-    embedding: vector('embedding', { dimensions: 15636 }),
+    // text-embedding-3-small returns 1536 dimensions.
+    embedding: vector('embedding', { dimensions: 1536 }).notNull(),
   },
   (table) => [
     index('embeddingIndex').using(
       'hnsw',
       table.embedding.op('vector_cosine_ops'),
     ),
+    index('chunksUserIdIndex').on(table.userId),
   ],
 );
 
@@ -92,3 +116,6 @@ export type SelectVerification = typeof verification.$inferSelect;
 
 export type InsertDocument = typeof documents.$inferInsert;
 export type SelectDocument = typeof documents.$inferSelect;
+
+export type InsertChunk = typeof chunks.$inferInsert;
+export type SelectChunk = typeof chunks.$inferSelect;
