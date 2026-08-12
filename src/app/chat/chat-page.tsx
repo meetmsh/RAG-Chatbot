@@ -1,23 +1,7 @@
 'use client';
 
 import { useChat } from '@ai-sdk/react';
-import {
-  ArrowUp,
-  BookOpen,
-  CalendarClock,
-  ChevronDown,
-  Database,
-  FileSearch,
-  Lightbulb,
-  Mail,
-  PenLine,
-  PlusIcon,
-  RefreshCw,
-  ScanSearch,
-  Server,
-  Sparkles,
-  Timer,
-} from 'lucide-react';
+import { ArrowUp, BookOpen, ChevronDown, PlusIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useRef, useState } from 'react';
 import {
@@ -42,67 +26,26 @@ import { APP_NAME } from '@/lib/app-config';
 import type { RagUIMessage } from '@/lib/chat-types';
 import { cn } from '@/lib/utils';
 
-// Each set pairs general assistant prompts with document-grounded ones, since
-// the assistant handles both. The icon signals which kind at a glance.
-const SUGGESTION_SETS = [
-  [
-    { icon: FileSearch, text: 'Summarise the main points of my documents' },
-    { icon: Lightbulb, text: 'Explain how vector embeddings work' },
-    { icon: ScanSearch, text: 'What are the key risks in my documents?' },
-    { icon: Mail, text: 'Write a follow-up email after an interview' },
-  ],
-  [
-    { icon: CalendarClock, text: 'List every deadline in my documents' },
-    { icon: Sparkles, text: 'Help me brainstorm names for a side project' },
-    { icon: FileSearch, text: 'Pull out the figures worth noting' },
-    { icon: Server, text: 'Best practices for REST API design?' },
-  ],
-  [
-    { icon: Timer, text: 'Give me a timeline of events from my documents' },
-    { icon: Database, text: 'Explain the difference between SQL and NoSQL' },
-    { icon: ScanSearch, text: 'Which claims lack supporting detail?' },
-    { icon: PenLine, text: 'Draft a cover letter for a developer role' },
-  ],
-];
-
 const MAX_CHARS = 1000;
-
-function AssistantMark({ className }: { className?: string }) {
-  return (
-    <span
-      className={cn(
-        'flex shrink-0 items-center justify-center rounded-xl [background:var(--app-accent-gradient)]',
-        className,
-      )}
-    >
-      <Sparkles className="size-4 text-white" />
-    </span>
-  );
-}
 
 function ThinkingIndicator() {
   return (
-    <div className="flex items-center gap-3">
-      <AssistantMark className="size-8" />
-      <div className="flex items-center gap-1.5 rounded-2xl rounded-bl-md border border-app-line bg-app-surface px-4 py-3">
-        <span className="size-1.5 animate-bounce rounded-full bg-app-dim [animation-delay:-0.3s]" />
-        <span className="size-1.5 animate-bounce rounded-full bg-app-dim [animation-delay:-0.15s]" />
-        <span className="size-1.5 animate-bounce rounded-full bg-app-dim" />
-      </div>
+    <div className="flex w-fit items-center gap-1.5 rounded-2xl rounded-bl-md border border-app-line bg-app-surface px-4 py-3">
+      <span className="size-1.5 animate-bounce rounded-full bg-app-dim [animation-delay:-0.3s]" />
+      <span className="size-1.5 animate-bounce rounded-full bg-app-dim [animation-delay:-0.15s]" />
+      <span className="size-1.5 animate-bounce rounded-full bg-app-dim" />
     </div>
   );
 }
 
 export function ChatPage({ userName }: { userName: string }) {
   const [input, setInput] = useState('');
-  const [suggestionIndex, setSuggestionIndex] = useState(0);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { messages, sendMessage, status, setMessages } =
     useChat<RagUIMessage>();
 
   const firstName = userName?.split(' ')[0] || 'there';
   const initial = (userName?.trim()[0] ?? '?').toUpperCase();
-  const suggestions = SUGGESTION_SETS[suggestionIndex % SUGGESTION_SETS.length];
   const busy = status === 'submitted' || status === 'streaming';
   const nearLimit = input.length > MAX_CHARS * 0.8;
 
@@ -131,15 +74,12 @@ export function ChatPage({ userName }: { userName: string }) {
       {/* Sidebar */}
       <aside className="hidden w-72 shrink-0 flex-col border-r border-app-line bg-app-sidebar md:flex">
         {/* Brand */}
-        <div className="flex items-center gap-3 px-5 pt-5 pb-4">
-          <AssistantMark className="size-9" />
-          <div className="min-w-0">
-            <div className="truncate text-sm font-semibold tracking-tight text-app-text">
-              {APP_NAME}
-            </div>
-            <div className="truncate text-xs text-app-dim">
-              Grounded in your documents
-            </div>
+        <div className="px-5 pt-5 pb-4">
+          <div className="truncate text-sm font-semibold tracking-tight text-app-text">
+            {APP_NAME}
+          </div>
+          <div className="truncate text-xs text-app-dim">
+            Grounded in your documents
           </div>
         </div>
 
@@ -150,7 +90,7 @@ export function ChatPage({ userName }: { userName: string }) {
           <button
             type="button"
             onClick={() => setMessages([])}
-            className="flex w-full items-center justify-center gap-2 rounded-xl border border-app-line bg-app-surface px-3 py-2.5 text-sm font-medium text-app-text shadow-[var(--app-shadow)] transition-colors hover:border-app-line-strong hover:bg-app-hover"
+            className="flex w-full items-center justify-center gap-2 rounded-[6px] border border-app-line bg-app-surface px-3 py-2.5 text-sm font-medium text-app-text transition-colors hover:border-app-line-strong hover:bg-app-hover"
           >
             <PlusIcon className="size-4" />
             New chat
@@ -162,7 +102,7 @@ export function ChatPage({ userName }: { userName: string }) {
 
         {/* Account */}
         <div className="flex items-center gap-2.5 border-t border-app-line px-4 py-3">
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-app-hover text-xs font-semibold text-app-muted">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-[6px] bg-app-hover text-xs font-semibold text-app-muted">
             {initial}
           </span>
           <span className="min-w-0 flex-1 truncate text-sm text-app-muted">
@@ -179,10 +119,7 @@ export function ChatPage({ userName }: { userName: string }) {
 
         {/* Header */}
         <header className="relative z-20 flex h-14 shrink-0 items-center justify-between border-b border-app-line/70 px-6 backdrop-blur-sm">
-          <div className="flex items-center gap-2 md:hidden">
-            <AssistantMark className="size-7" />
-            <span className="text-sm font-semibold">{APP_NAME}</span>
-          </div>
+          <span className="text-sm font-semibold md:hidden">{APP_NAME}</span>
           <span className="hidden text-sm text-app-dim md:block">
             {messages.length === 0
               ? 'New conversation'
@@ -226,37 +163,6 @@ export function ChatPage({ userName }: { userName: string }) {
                 they came from.
               </motion.p>
 
-              <motion.div
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, ease: 'easeOut', delay: 0.18 }}
-                className="mt-8 grid gap-3 sm:grid-cols-2"
-              >
-                {suggestions.map((suggestion) => (
-                  <button
-                    key={suggestion.text}
-                    type="button"
-                    onClick={() => setInput(suggestion.text)}
-                    className="app-card app-lift group flex items-start gap-3 rounded-2xl p-4 text-left"
-                  >
-                    <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-app-hover text-app-muted transition-colors group-hover:text-app-teal">
-                      <suggestion.icon className="size-4" />
-                    </span>
-                    <span className="text-sm leading-relaxed text-app-muted transition-colors group-hover:text-app-text">
-                      {suggestion.text}
-                    </span>
-                  </button>
-                ))}
-              </motion.div>
-
-              <button
-                type="button"
-                onClick={() => setSuggestionIndex((prev) => prev + 1)}
-                className="mt-5 flex w-fit items-center gap-2 text-xs text-app-dim transition-colors hover:text-app-text"
-              >
-                <RefreshCw className="size-3" />
-                Show different prompts
-              </button>
             </div>
           </div>
         ) : (
@@ -270,10 +176,6 @@ export function ChatPage({ userName }: { userName: string }) {
                     message.role === 'user' ? 'justify-end' : 'justify-start',
                   )}
                 >
-                  {message.role === 'assistant' ? (
-                    <AssistantMark className="mt-0.5 size-8" />
-                  ) : null}
-
                   <div className="flex min-w-0 flex-col gap-2.5">
                     {message.parts.map((part, i) => {
                       switch (part.type) {

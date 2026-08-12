@@ -68,7 +68,7 @@ export function DocumentPanel() {
           Knowledge base
         </span>
         {documents.length > 0 ? (
-          <span className="rounded-full bg-app-hover px-1.5 py-0.5 text-[10px] font-medium tabular-nums text-app-muted">
+          <span className="rounded-[6px] bg-app-hover px-1.5 py-0.5 text-[10px] font-medium tabular-nums text-app-muted">
             {documents.length}
           </span>
         ) : null}
@@ -89,7 +89,7 @@ export function DocumentPanel() {
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
-          className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-app-line-strong px-3 py-3 text-sm text-app-muted transition-colors hover:border-app-teal/50 hover:bg-app-hover hover:text-app-text disabled:opacity-50"
+          className="flex w-full items-center justify-center gap-2 rounded-[6px] border border-dashed border-app-line-strong px-3 py-3 text-sm text-app-muted transition-colors hover:border-app-teal/50 hover:bg-app-hover hover:text-app-text disabled:opacity-50"
         >
           {uploading ? (
             <>
@@ -104,7 +104,7 @@ export function DocumentPanel() {
           )}
         </button>
         {error ? (
-          <p className="mt-2 rounded-lg bg-red-500/8 px-2.5 py-1.5 text-xs leading-relaxed text-red-500 dark:text-red-400">
+          <p className="mt-2 rounded-[6px] bg-red-500/8 px-2.5 py-1.5 text-xs leading-relaxed text-red-500 dark:text-red-400">
             {error}
           </p>
         ) : null}
@@ -120,9 +120,9 @@ export function DocumentPanel() {
           documents.map((doc) => (
             <div
               key={doc.id}
-              className="group flex items-center gap-2.5 rounded-xl px-2 py-2 transition-colors hover:bg-app-hover"
+              className="group flex items-center gap-2.5 rounded-[6px] px-2 py-2 transition-colors hover:bg-app-hover"
             >
-              <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-app-hover text-app-muted group-hover:bg-app-surface">
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-[6px] bg-app-hover text-app-muted group-hover:bg-app-surface">
                 <FileText className="size-4" />
               </span>
               <div className="min-w-0 flex-1">
@@ -136,7 +136,7 @@ export function DocumentPanel() {
                 type="button"
                 onClick={() => remove(doc.id)}
                 aria-label={`Delete ${doc.title}`}
-                className="flex size-7 shrink-0 items-center justify-center rounded-lg text-app-dim opacity-0 transition-all hover:bg-red-500/10 hover:text-red-500 focus-visible:opacity-100 group-hover:opacity-100"
+                className="flex size-7 shrink-0 items-center justify-center rounded-[6px] text-app-dim opacity-0 transition-all hover:bg-red-500/10 hover:text-red-500 focus-visible:opacity-100 group-hover:opacity-100"
               >
                 <Trash2 className="size-3.5" />
               </button>

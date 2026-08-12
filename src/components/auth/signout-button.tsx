@@ -29,7 +29,7 @@ export const SignoutButton = ({
       title="Sign out"
       aria-label="Sign out"
       className={cn(
-        'flex items-center gap-1.5 rounded-lg text-app-muted transition-colors hover:bg-app-hover hover:text-app-text',
+        'flex items-center gap-1.5 rounded-[6px] text-app-muted transition-colors hover:bg-app-hover hover:text-app-text',
         iconOnly ? 'size-8 shrink-0 justify-center' : 'w-full px-3 py-2 text-sm',
         className,
       )}
