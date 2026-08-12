@@ -5,7 +5,13 @@ import { useRouter } from 'next/navigation';
 import { authClient } from '@/lib/auth-client';
 import { cn } from '@/lib/utils';
 
-export const SignoutButton = ({ className }: { className?: string }) => {
+export const SignoutButton = ({
+  className,
+  iconOnly = false,
+}: {
+  className?: string;
+  iconOnly?: boolean;
+}) => {
   const router = useRouter();
 
   const signout = async () => {
@@ -20,13 +26,16 @@ export const SignoutButton = ({ className }: { className?: string }) => {
     <button
       type="button"
       onClick={signout}
+      title="Sign out"
+      aria-label="Sign out"
       className={cn(
-        'flex w-full items-center gap-1.5 rounded-md px-3 py-1.5 text-sm text-gray-500 transition-colors hover:bg-black/4 hover:text-gray-800 dark:text-[var(--app-text-muted)] dark:hover:bg-[var(--app-surface-hover)] dark:hover:text-[var(--app-text)]',
+        'flex items-center gap-1.5 rounded-lg text-app-muted transition-colors hover:bg-app-hover hover:text-app-text',
+        iconOnly ? 'size-8 shrink-0 justify-center' : 'w-full px-3 py-2 text-sm',
         className,
       )}
     >
       <LogOut className="size-4" />
-      Sign out
+      {iconOnly ? null : 'Sign out'}
     </button>
   );
 };

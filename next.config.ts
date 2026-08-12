@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // The dev indicator defaults to bottom-left, where it covers the sidebar
+  // account row. Development only; it does not ship to production.
+  devIndicators: {
+    position: 'bottom-right',
+  },
 };
 
 export default nextConfig;

@@ -1,8 +1,25 @@
 'use client';
 
 import { useChat } from '@ai-sdk/react';
+import {
+  ArrowUp,
+  BookOpen,
+  CalendarClock,
+  ChevronDown,
+  Database,
+  FileSearch,
+  Lightbulb,
+  Mail,
+  PenLine,
+  PlusIcon,
+  RefreshCw,
+  ScanSearch,
+  Server,
+  Sparkles,
+  Timer,
+} from 'lucide-react';
 import { motion } from 'motion/react';
-import { Fragment, useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   Conversation,
   ConversationContent,
@@ -21,50 +38,80 @@ import {
 import { SignoutButton } from '@/components/auth/signout-button';
 import { DocumentPanel } from '@/components/documents/document-panel';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { Spinner as Loader } from '@/components/ui/spinner';
 import { APP_NAME } from '@/lib/app-config';
 import type { RagUIMessage } from '@/lib/chat-types';
-import { ArrowRight, PlusIcon, RefreshCw } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 // Each set pairs general assistant prompts with document-grounded ones, since
-// the assistant handles both.
+// the assistant handles both. The icon signals which kind at a glance.
 const SUGGESTION_SETS = [
   [
-    'Summarise the main points of my uploaded documents',
-    'Explain how vector embeddings work in simple terms',
-    'What are the key risks mentioned in my documents?',
-    'Write a polite follow-up email after an interview',
+    { icon: FileSearch, text: 'Summarise the main points of my documents' },
+    { icon: Lightbulb, text: 'Explain how vector embeddings work' },
+    { icon: ScanSearch, text: 'What are the key risks in my documents?' },
+    { icon: Mail, text: 'Write a follow-up email after an interview' },
   ],
   [
-    'List every date or deadline you can find in my documents',
-    'Help me brainstorm names for a side project',
-    'Pull out the numbers and figures worth noting',
-    'What are the best practices for REST API design?',
+    { icon: CalendarClock, text: 'List every deadline in my documents' },
+    { icon: Sparkles, text: 'Help me brainstorm names for a side project' },
+    { icon: FileSearch, text: 'Pull out the figures worth noting' },
+    { icon: Server, text: 'Best practices for REST API design?' },
   ],
   [
-    'Give me a timeline of events from my documents',
-    'Explain the difference between SQL and NoSQL databases',
-    'Which claims in my documents lack supporting detail?',
-    'Draft a short cover letter for a developer role',
+    { icon: Timer, text: 'Give me a timeline of events from my documents' },
+    { icon: Database, text: 'Explain the difference between SQL and NoSQL' },
+    { icon: ScanSearch, text: 'Which claims lack supporting detail?' },
+    { icon: PenLine, text: 'Draft a cover letter for a developer role' },
   ],
 ];
 
 const MAX_CHARS = 1000;
 
+function AssistantMark({ className }: { className?: string }) {
+  return (
+    <span
+      className={cn(
+        'flex shrink-0 items-center justify-center rounded-xl [background:var(--app-accent-gradient)]',
+        className,
+      )}
+    >
+      <Sparkles className="size-4 text-white" />
+    </span>
+  );
+}
+
+function ThinkingIndicator() {
+  return (
+    <div className="flex items-center gap-3">
+      <AssistantMark className="size-8" />
+      <div className="flex items-center gap-1.5 rounded-2xl rounded-bl-md border border-app-line bg-app-surface px-4 py-3">
+        <span className="size-1.5 animate-bounce rounded-full bg-app-dim [animation-delay:-0.3s]" />
+        <span className="size-1.5 animate-bounce rounded-full bg-app-dim [animation-delay:-0.15s]" />
+        <span className="size-1.5 animate-bounce rounded-full bg-app-dim" />
+      </div>
+    </div>
+  );
+}
+
 export function ChatPage({ userName }: { userName: string }) {
   const [input, setInput] = useState('');
   const [suggestionIndex, setSuggestionIndex] = useState(0);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { messages, sendMessage, status, setMessages } =
     useChat<RagUIMessage>();
 
-  const firstName = userName?.split(' ')[0] ?? 'there';
+  const firstName = userName?.split(' ')[0] || 'there';
+  const initial = (userName?.trim()[0] ?? '?').toUpperCase();
   const suggestions = SUGGESTION_SETS[suggestionIndex % SUGGESTION_SETS.length];
+  const busy = status === 'submitted' || status === 'streaming';
+  const nearLimit = input.length > MAX_CHARS * 0.8;
 
   const submit = () => {
-    if (!input.trim() || status === 'submitted' || status === 'streaming')
-      return;
+    if (!input.trim() || busy) return;
     sendMessage({ text: input });
     setInput('');
+    // The textarea grows with its content, so collapse it back on send.
+    if (textareaRef.current) textareaRef.current.style.height = 'auto';
   };
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
@@ -80,26 +127,33 @@ export function ChatPage({ userName }: { userName: string }) {
   };
 
   return (
-    <div className="flex h-screen bg-white dark:bg-[var(--app-bg)]">
+    <div className="flex h-screen bg-app-bg text-app-text">
       {/* Sidebar */}
-      <aside className="w-64 shrink-0 flex flex-col border-r border-gray-200 bg-white dark:border-[var(--app-border)] dark:bg-[var(--app-bg-sidebar)]">
-        {/* Logo */}
-        <div className="p-5 flex items-center gap-3">
-          <div>
-            <div className="text-xs text-gray-400 leading-tight dark:text-[var(--app-text-dim)]">
+      <aside className="hidden w-72 shrink-0 flex-col border-r border-app-line bg-app-sidebar md:flex">
+        {/* Brand */}
+        <div className="flex items-center gap-3 px-5 pt-5 pb-4">
+          <AssistantMark className="size-9" />
+          <div className="min-w-0">
+            <div className="truncate text-sm font-semibold tracking-tight text-app-text">
               {APP_NAME}
+            </div>
+            <div className="truncate text-xs text-app-dim">
+              Grounded in your documents
             </div>
           </div>
         </div>
 
-        {/* New Chat */}
-        <div className="px-4 pb-3">
+        <div className="app-rule mx-5" />
+
+        {/* New chat */}
+        <div className="px-4 py-4">
           <button
+            type="button"
             onClick={() => setMessages([])}
-            className="w-full flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm text-gray-500 hover:bg-black/4 hover:text-gray-800 transition-colors dark:text-[var(--app-text-muted)] dark:hover:bg-[var(--app-surface-hover)] dark:hover:text-[var(--app-text)]"
+            className="flex w-full items-center justify-center gap-2 rounded-xl border border-app-line bg-app-surface px-3 py-2.5 text-sm font-medium text-app-text shadow-[var(--app-shadow)] transition-colors hover:border-app-line-strong hover:bg-app-hover"
           >
             <PlusIcon className="size-4" />
-            New Chat
+            New chat
           </button>
         </div>
 
@@ -107,134 +161,207 @@ export function ChatPage({ userName }: { userName: string }) {
         <DocumentPanel />
 
         {/* Account */}
-        <div className="border-t border-gray-200 p-3 dark:border-[var(--app-border)]">
-          <SignoutButton />
+        <div className="flex items-center gap-2.5 border-t border-app-line px-4 py-3">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-app-hover text-xs font-semibold text-app-muted">
+            {initial}
+          </span>
+          <span className="min-w-0 flex-1 truncate text-sm text-app-muted">
+            {userName || 'Signed in'}
+          </span>
+          <SignoutButton iconOnly />
         </div>
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 flex flex-col bg-[#f5f5f7] min-w-0 relative dark:bg-[var(--app-bg)]">
-        {/* Atmosphere — dark only */}
-        <div className="pointer-events-none absolute inset-0 z-0 hidden dark:block app-atmosphere" />
+      <main className="relative flex min-w-0 flex-1 flex-col">
+        {/* Atmosphere */}
+        <div className="app-atmosphere pointer-events-none absolute inset-0 z-0" />
 
-        <div className="absolute top-5 right-6 z-20 flex items-center gap-3">
+        {/* Header */}
+        <header className="relative z-20 flex h-14 shrink-0 items-center justify-between border-b border-app-line/70 px-6 backdrop-blur-sm">
+          <div className="flex items-center gap-2 md:hidden">
+            <AssistantMark className="size-7" />
+            <span className="text-sm font-semibold">{APP_NAME}</span>
+          </div>
+          <span className="hidden text-sm text-app-dim md:block">
+            {messages.length === 0
+              ? 'New conversation'
+              : `${messages.length} message${messages.length === 1 ? '' : 's'}`}
+          </span>
           <ThemeToggle />
-        </div>
+        </header>
 
         {messages.length === 0 ? (
-          <div className="relative z-10 flex-1 flex flex-col justify-center px-8 pt-16">
-            <div className="w-full max-w-3xl mx-auto">
-              <motion.p
+          <div className="relative z-10 flex flex-1 flex-col justify-center overflow-y-auto px-6 py-10">
+            <div className="mx-auto w-full max-w-3xl">
+              <motion.div
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, ease: 'easeOut' }}
-                className="text-2xl text-gray-400 mb-3 dark:text-[var(--app-text)] dark:font-semibold"
+                className="mb-5 inline-flex items-center gap-2 rounded-full border border-app-line bg-app-surface px-3 py-1 text-xs text-app-muted"
               >
-                Hi there, <span className="greeting-name">{firstName}</span>
-              </motion.p>
+                <span className="size-1.5 rounded-full bg-app-teal" />
+                Retrieval augmented
+              </motion.div>
+
               <motion.h1
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, ease: 'easeOut', delay: 0.1 }}
-                className="accent-text text-4xl font-bold leading-[1.1] tracking-tight mb-5"
+                transition={{ duration: 0.5, ease: 'easeOut', delay: 0.05 }}
+                className="text-4xl font-semibold leading-[1.1] tracking-tight sm:text-5xl"
               >
-                What would you like to know?
+                Hi {firstName},
+                <br />
+                <span className="accent-text">what would you like to know?</span>
               </motion.h1>
+
               <motion.p
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, ease: 'easeOut', delay: 0.2 }}
-                className="text-gray-400 text-sm mb-8 dark:text-[var(--app-text-dim)]"
+                transition={{ duration: 0.5, ease: 'easeOut', delay: 0.12 }}
+                className="mt-4 max-w-lg text-sm leading-relaxed text-app-muted"
               >
-                Use one of the most common prompts below or use your own to
-                begin
+                Ask anything at all. To ask about your own material, upload it to
+                the knowledge base first and answers will cite the exact passage
+                they came from.
               </motion.p>
 
-              <div className="grid grid-cols-4 gap-3 mb-4">
-                {suggestions.map((suggestion, i) => (
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, ease: 'easeOut', delay: 0.18 }}
+                className="mt-8 grid gap-3 sm:grid-cols-2"
+              >
+                {suggestions.map((suggestion) => (
                   <button
-                    key={i}
-                    onClick={() => setInput(suggestion)}
-                    className="p-3.5 bg-white rounded-xl border border-gray-200 text-left text-sm text-gray-700 hover:border-[#24B1B1]/40 hover:shadow-sm transition-all leading-relaxed h-24 flex flex-col justify-start dark:bg-[var(--app-surface)] dark:border-[var(--app-border)] dark:text-[var(--app-text-muted)] dark:hover:border-[var(--app-teal)]/50 dark:hover:text-[var(--app-text)]"
+                    key={suggestion.text}
+                    type="button"
+                    onClick={() => setInput(suggestion.text)}
+                    className="app-card app-lift group flex items-start gap-3 rounded-2xl p-4 text-left"
                   >
-                    {suggestion}
+                    <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-app-hover text-app-muted transition-colors group-hover:text-app-teal">
+                      <suggestion.icon className="size-4" />
+                    </span>
+                    <span className="text-sm leading-relaxed text-app-muted transition-colors group-hover:text-app-text">
+                      {suggestion.text}
+                    </span>
                   </button>
                 ))}
-              </div>
+              </motion.div>
 
               <button
+                type="button"
                 onClick={() => setSuggestionIndex((prev) => prev + 1)}
-                className="flex items-center gap-2 text-xs text-gray-400 hover:text-gray-600 transition-colors w-fit dark:text-[var(--app-text-dim)] dark:hover:text-[var(--app-text)]"
+                className="mt-5 flex w-fit items-center gap-2 text-xs text-app-dim transition-colors hover:text-app-text"
               >
                 <RefreshCw className="size-3" />
-                Refresh Prompts
+                Show different prompts
               </button>
             </div>
           </div>
         ) : (
-          <Conversation className="relative z-10 flex-1 px-8 py-6">
-            <ConversationContent>
+          <Conversation className="app-scroll relative z-10 flex-1 px-6">
+            <ConversationContent className="mx-auto w-full max-w-3xl gap-6 py-8">
               {messages.map((message) => (
-                <div key={message.id}>
-                  {message.parts.map((part, i) => {
-                    switch (part.type) {
-                      case 'text':
-                        return (
-                          <Fragment key={`${message.id}-${i}`}>
-                            <Message from={message.role}>
-                              <MessageContent>
+                <div
+                  key={message.id}
+                  className={cn(
+                    'flex w-full gap-3',
+                    message.role === 'user' ? 'justify-end' : 'justify-start',
+                  )}
+                >
+                  {message.role === 'assistant' ? (
+                    <AssistantMark className="mt-0.5 size-8" />
+                  ) : null}
+
+                  <div className="flex min-w-0 flex-col gap-2.5">
+                    {message.parts.map((part, i) => {
+                      switch (part.type) {
+                        case 'text':
+                          return (
+                            <Message
+                              key={`${message.id}-${i}`}
+                              from={message.role}
+                              className="max-w-full"
+                            >
+                              <MessageContent
+                                className={cn(
+                                  'leading-relaxed',
+                                  'group-[.is-user]:rounded-2xl group-[.is-user]:rounded-br-md group-[.is-user]:border group-[.is-user]:border-app-line group-[.is-user]:bg-app-surface group-[.is-user]:px-4 group-[.is-user]:py-2.5 group-[.is-user]:text-app-text',
+                                  'group-[.is-assistant]:text-app-text',
+                                )}
+                              >
                                 <Response>{part.text}</Response>
                               </MessageContent>
                             </Message>
-                          </Fragment>
-                        );
-                      case 'data-sources':
-                        return part.data.length === 0 ? null : (
-                          <Sources key={`${message.id}-${i}`} className="px-1">
-                            <SourcesTrigger count={part.data.length} />
-                            <SourcesContent>
-                              {part.data.map((source) => (
-                                <div
-                                  key={source.chunkId}
-                                  className="max-w-2xl rounded-lg border border-gray-200 bg-white p-3 dark:border-[var(--app-border)] dark:bg-[var(--app-surface)]"
-                                >
-                                  <div className="mb-1 flex items-center gap-2">
-                                    <span className="font-medium text-gray-700 dark:text-[var(--app-text)]">
-                                      [{source.index}] {source.documentTitle}
-                                    </span>
-                                    <span className="text-gray-400 dark:text-[var(--app-text-dim)]">
-                                      {Math.round(source.similarity * 100)}%
-                                      match
-                                    </span>
+                          );
+
+                        case 'data-sources':
+                          return part.data.length === 0 ? null : (
+                            <Sources
+                              key={`${message.id}-${i}`}
+                              className="mb-0 text-app-muted"
+                            >
+                              <SourcesTrigger
+                                count={part.data.length}
+                                className="group/src rounded-full border border-app-line bg-app-surface px-3 py-1 text-app-muted transition-colors hover:text-app-text"
+                              >
+                                <BookOpen className="size-3.5" />
+                                <span className="font-medium">
+                                  {part.data.length} source
+                                  {part.data.length === 1 ? '' : 's'}
+                                </span>
+                                <ChevronDown className="size-3.5 transition-transform group-data-[state=open]/src:rotate-180" />
+                              </SourcesTrigger>
+                              <SourcesContent className="w-full">
+                                {part.data.map((source) => (
+                                  <div
+                                    key={source.chunkId}
+                                    className="app-card w-full rounded-xl p-3"
+                                  >
+                                    <div className="mb-1.5 flex items-center gap-2">
+                                      <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-app-teal/12 text-[10px] font-semibold text-app-teal">
+                                        {source.index}
+                                      </span>
+                                      <span className="min-w-0 flex-1 truncate font-medium text-app-text">
+                                        {source.documentTitle}
+                                      </span>
+                                      <span className="shrink-0 text-app-dim">
+                                        {Math.round(source.similarity * 100)}%
+                                      </span>
+                                    </div>
+                                    <p className="line-clamp-3 leading-relaxed text-app-muted">
+                                      {source.snippet}
+                                    </p>
                                   </div>
-                                  <p className="line-clamp-3 leading-relaxed text-gray-500 dark:text-[var(--app-text-muted)]">
-                                    {source.snippet}
-                                  </p>
-                                </div>
-                              ))}
-                            </SourcesContent>
-                          </Sources>
-                        );
-                      default:
-                        return null;
-                    }
-                  })}
+                                ))}
+                              </SourcesContent>
+                            </Sources>
+                          );
+
+                        default:
+                          return null;
+                      }
+                    })}
+                  </div>
                 </div>
               ))}
-              {(status === 'submitted' || status === 'streaming') && <Loader />}
+
+              {status === 'submitted' ? <ThinkingIndicator /> : null}
             </ConversationContent>
             <ConversationScrollButton />
           </Conversation>
         )}
 
-        {/* Input */}
-        <div className="relative z-10 px-8 pb-6">
-          <div className="max-w-3xl mx-auto">
+        {/* Composer */}
+        <div className="relative z-10 px-6 pb-6">
+          <div className="mx-auto w-full max-w-3xl">
             <form
               onSubmit={handleSubmit}
-              className="composer bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden transition-all dark:bg-[var(--app-surface)] dark:border-[var(--app-border)] dark:shadow-none"
+              className="composer overflow-hidden rounded-2xl border border-app-line bg-app-surface shadow-[var(--app-shadow)]"
             >
               <textarea
+                ref={textareaRef}
                 value={input}
                 onChange={(e) => {
                   if (e.target.value.length <= MAX_CHARS)
@@ -242,27 +369,32 @@ export function ChatPage({ userName }: { userName: string }) {
                 }}
                 onKeyDown={handleKeyDown}
                 placeholder={`Message ${APP_NAME}...`}
-                className="w-full px-5 pt-5 pb-2 bg-transparent outline-none resize-none text-sm text-gray-700 placeholder:text-gray-400 dark:text-[var(--app-text)] dark:placeholder:text-[var(--app-text-dim)]"
-                rows={2}
+                className="max-h-48 w-full resize-none bg-transparent px-5 pt-4 pb-1 text-sm leading-relaxed text-app-text outline-none placeholder:text-app-dim"
+                rows={1}
+                onInput={(e) => {
+                  // Grow with the content instead of reserving empty rows.
+                  const el = e.currentTarget;
+                  el.style.height = 'auto';
+                  el.style.height = `${el.scrollHeight}px`;
+                }}
               />
-              <div className="flex items-center gap-4 px-4 pb-4 pt-1">
-                <span className="text-sm text-gray-400/80 dark:text-[var(--app-text-dim)]">
-                  Ask anything, or upload a document to ask about it
+              <div className="flex items-center gap-3 px-4 pb-3">
+                <span className="hidden text-xs text-app-dim sm:block">
+                  Enter to send, Shift + Enter for a new line
                 </span>
                 <div className="flex-1" />
-                <span className="text-sm text-gray-400 dark:text-[var(--app-text-dim)]">
-                  {input.length}/{MAX_CHARS}
-                </span>
+                {nearLimit ? (
+                  <span className="text-xs tabular-nums text-app-dim">
+                    {input.length}/{MAX_CHARS}
+                  </span>
+                ) : null}
                 <button
                   type="submit"
-                  disabled={
-                    !input.trim() ||
-                    status === 'submitted' ||
-                    status === 'streaming'
-                  }
-                  className="w-9 h-9 rounded-full bg-[#24B1B1] flex items-center justify-center hover:bg-[#1d9c9c] disabled:opacity-40 disabled:cursor-not-allowed transition-all shrink-0 dark:bg-none dark:[background:var(--app-accent-gradient)] dark:disabled:opacity-45 dark:enabled:hover:scale-105"
+                  aria-label="Send message"
+                  disabled={!input.trim() || busy}
+                  className="flex size-9 shrink-0 items-center justify-center rounded-xl [background:var(--app-accent-gradient)] transition-all enabled:hover:scale-105 enabled:active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  <ArrowRight className="size-4 text-white" />
+                  <ArrowUp className="size-4 text-white" />
                 </button>
               </div>
             </form>
