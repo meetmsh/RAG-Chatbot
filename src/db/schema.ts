@@ -88,6 +88,7 @@ export const conversations = pgTable(
       .references(() => user.id, { onDelete: 'cascade' }),
     title: text('title').notNull(),
     messages: jsonb('messages').$type<RagUIMessage[]>().notNull().default([]),
+    pinned: boolean('pinned').notNull().default(false),
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
   },

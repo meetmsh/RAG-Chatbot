@@ -25,11 +25,12 @@ export async function GET() {
     .select({
       id: conversations.id,
       title: conversations.title,
+      pinned: conversations.pinned,
       updatedAt: conversations.updatedAt,
     })
     .from(conversations)
     .where(eq(conversations.userId, session.user.id))
-    .orderBy(desc(conversations.updatedAt))
+    .orderBy(desc(conversations.pinned), desc(conversations.updatedAt))
     .limit(50);
 
   return Response.json({ conversations: rows });
@@ -53,6 +54,7 @@ export async function POST(req: Request) {
     .returning({
       id: conversations.id,
       title: conversations.title,
+      pinned: conversations.pinned,
       updatedAt: conversations.updatedAt,
     });
 

@@ -9,6 +9,7 @@ import {
   Loader2,
   PlusIcon,
   Square,
+  Trash2,
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -31,6 +32,17 @@ import { SignoutButton } from '@/components/auth/signout-button';
 import { ConversationList } from '@/components/conversations/conversation-list';
 import { DocumentPanel } from '@/components/documents/document-panel';
 import { ThemeToggle } from '@/components/theme-toggle';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import {
   Sheet,
   SheetContent,
@@ -56,7 +68,11 @@ function placeFirst(
   return [
     conversation,
     ...conversations.filter((item) => item.id !== conversation.id),
-  ];
+  ].sort(
+    (a, b) =>
+      Number(b.pinned) - Number(a.pinned) ||
+      new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+  );
 }
 
 async function saveConversation(id: number, messages: RagUIMessage[]) {
@@ -87,6 +103,12 @@ export function ChatPage({ userName }: { userName: string }) {
   >(null);
   const [creatingConversation, setCreatingConversation] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [conversationToDelete, setConversationToDelete] =
+    useState<ConversationSummary | null>(null);
+  const [deletingConversation, setDeletingConversation] = useState(false);
+  const [deleteConversationError, setDeleteConversationError] = useState<
+    string | null
+  >(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const activeConversationRef = useRef<number | null>(null);
   const { messages, sendMessage, status, setMessages, stop } =
@@ -192,6 +214,74 @@ export function ChatPage({ userName }: { userName: string }) {
     }
   };
 
+  const togglePinned = async (conversation: ConversationSummary) => {
+    const pinned = !conversation.pinned;
+    setConversations((current) =>
+      placeFirst(current, { ...conversation, pinned }),
+    );
+
+    try {
+      const res = await fetch(`/api/conversations/${conversation.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pinned }),
+      });
+
+      if (!res.ok) throw new Error('Pin update failed');
+      const data: { conversation: ConversationSummary } = await res.json();
+      setConversations((current) =>
+        placeFirst(current, data.conversation),
+      );
+    } catch {
+      setConversations((current) => placeFirst(current, conversation));
+    }
+  };
+
+  const requestConversationDelete = (conversation: ConversationSummary) => {
+    setDeleteConversationError(null);
+    setConversationToDelete(conversation);
+  };
+
+  const deleteConversation = async () => {
+    if (!conversationToDelete || deletingConversation) return;
+
+    setDeletingConversation(true);
+    setDeleteConversationError(null);
+
+    try {
+      if (conversationToDelete.id === activeConversationRef.current) {
+        await preserveActiveStream();
+      }
+
+      const res = await fetch(
+        `/api/conversations/${conversationToDelete.id}`,
+        { method: 'DELETE' },
+      );
+
+      if (!res.ok) {
+        setDeleteConversationError('Could not delete this thread');
+        return;
+      }
+
+      setConversations((current) =>
+        current.filter((item) => item.id !== conversationToDelete.id),
+      );
+
+      if (conversationToDelete.id === activeConversationRef.current) {
+        selectActiveConversation(null);
+        setMessages([]);
+        setInput('');
+        setHistoryOpen(false);
+      }
+
+      setConversationToDelete(null);
+    } catch {
+      setDeleteConversationError('Could not delete this thread');
+    } finally {
+      setDeletingConversation(false);
+    }
+  };
+
   const submit = async () => {
     if (!input.trim() || busy) return;
     const text = input.trim();
@@ -278,7 +368,7 @@ export function ChatPage({ userName }: { userName: string }) {
         {/* Conversations */}
         <div className="px-3 pb-5">
           <div className="flex items-center justify-between px-3 pb-2.5">
-            <span className="text-xs font-medium text-app-dim">Recent</span>
+            <span className="text-xs font-medium text-app-dim">Threads</span>
             {conversations.length > 0 ? (
               <span className="text-[11px] tabular-nums text-app-dim">
                 {conversations.length}
@@ -292,6 +382,8 @@ export function ChatPage({ userName }: { userName: string }) {
               loadingId={loadingConversationId}
               loading={loadingConversations}
               onSelect={(id) => void resumeConversation(id)}
+              onPin={(conversation) => void togglePinned(conversation)}
+              onDelete={requestConversationDelete}
               className="max-h-44"
             />
           </div>
@@ -366,6 +458,8 @@ export function ChatPage({ userName }: { userName: string }) {
                     loadingId={loadingConversationId}
                     loading={loadingConversations}
                     onSelect={(id) => void resumeConversation(id)}
+                    onPin={(conversation) => void togglePinned(conversation)}
+                    onDelete={requestConversationDelete}
                     className="h-full"
                   />
                 </div>
@@ -593,6 +687,53 @@ export function ChatPage({ userName }: { userName: string }) {
           </div>
         </div>
       </main>
+
+      <AlertDialog
+        open={conversationToDelete !== null}
+        onOpenChange={(open) => {
+          if (!open && !deletingConversation) setConversationToDelete(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-red-500/10 text-red-500">
+              <Trash2 className="size-5" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>Delete this thread?</AlertDialogTitle>
+            <AlertDialogDescription>
+              <span className="font-medium text-app-text">
+                {conversationToDelete?.title}
+              </span>{' '}
+              and its message history will be permanently removed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          {deleteConversationError ? (
+            <p className="rounded-[6px] bg-red-500/8 px-2.5 py-2 text-xs text-red-500 dark:text-red-400">
+              {deleteConversationError}
+            </p>
+          ) : null}
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deletingConversation}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={deletingConversation}
+              onClick={(event) => {
+                event.preventDefault();
+                void deleteConversation();
+              }}
+            >
+              {deletingConversation ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Trash2 className="size-4" />
+              )}
+              {deletingConversation ? 'Deleting...' : 'Delete thread'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

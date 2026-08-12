@@ -24,6 +24,7 @@ export type DocumentSummary = {
 export type ConversationSummary = {
   id: number;
   title: string;
+  pinned: boolean;
   updatedAt: string;
 };
 
