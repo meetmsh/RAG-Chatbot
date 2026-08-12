@@ -2,7 +2,7 @@
 
 import { useChat } from '@ai-sdk/react';
 import { ArrowUp, BookOpen, ChevronDown, PlusIcon } from 'lucide-react';
-import { motion } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import { useRef, useState } from 'react';
 import {
   Conversation,
@@ -27,16 +27,6 @@ import type { RagUIMessage } from '@/lib/chat-types';
 import { cn } from '@/lib/utils';
 
 const MAX_CHARS = 1000;
-
-function ThinkingIndicator() {
-  return (
-    <div className="flex w-fit items-center gap-1.5 rounded-2xl rounded-bl-md border border-app-line bg-app-surface px-4 py-3">
-      <span className="size-1.5 animate-bounce rounded-full bg-app-dim [animation-delay:-0.3s]" />
-      <span className="size-1.5 animate-bounce rounded-full bg-app-dim [animation-delay:-0.15s]" />
-      <span className="size-1.5 animate-bounce rounded-full bg-app-dim" />
-    </div>
-  );
-}
 
 export function ChatPage({ userName }: { userName: string }) {
   const [input, setInput] = useState('');
@@ -72,27 +62,25 @@ export function ChatPage({ userName }: { userName: string }) {
   return (
     <div className="flex h-screen bg-app-bg text-app-text">
       {/* Sidebar */}
-      <aside className="hidden w-72 shrink-0 flex-col border-r border-app-line bg-app-sidebar md:flex">
+      <aside className="hidden w-72 shrink-0 flex-col bg-app-sidebar md:flex">
         {/* Brand */}
-        <div className="px-5 pt-5 pb-4">
+        <div className="px-6 pt-6 pb-5">
           <div className="truncate text-sm font-semibold tracking-tight text-app-text">
             {APP_NAME}
           </div>
-          <div className="truncate text-xs text-app-dim">
+          <div className="mt-0.5 truncate text-xs text-app-dim">
             Grounded in your documents
           </div>
         </div>
 
-        <div className="app-rule mx-5" />
-
         {/* New chat */}
-        <div className="px-4 py-4">
+        <div className="px-3 pb-6">
           <button
             type="button"
             onClick={() => setMessages([])}
-            className="flex w-full items-center justify-center gap-2 rounded-[6px] border border-app-line bg-app-surface px-3 py-2.5 text-sm font-medium text-app-text transition-colors hover:border-app-line-strong hover:bg-app-hover"
+            className="flex w-full items-center gap-2.5 rounded-[6px] px-3 py-2.5 text-sm font-medium text-app-text transition-colors duration-150 hover:bg-app-hover/60"
           >
-            <PlusIcon className="size-4" />
+            <PlusIcon className="size-4 text-app-muted" strokeWidth={1.8} />
             New chat
           </button>
         </div>
@@ -101,8 +89,8 @@ export function ChatPage({ userName }: { userName: string }) {
         <DocumentPanel />
 
         {/* Account */}
-        <div className="flex items-center gap-2.5 border-t border-app-line px-4 py-3">
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-[6px] bg-app-hover text-xs font-semibold text-app-muted">
+        <div className="flex items-center gap-2.5 px-4 py-4">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-app-hover/70 text-xs font-semibold text-app-muted">
             {initial}
           </span>
           <span className="min-w-0 flex-1 truncate text-sm text-app-muted">
@@ -168,88 +156,123 @@ export function ChatPage({ userName }: { userName: string }) {
         ) : (
           <Conversation className="app-scroll relative z-10 flex-1 px-6">
             <ConversationContent className="mx-auto w-full max-w-3xl gap-6 py-8">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={cn(
-                    'flex w-full gap-3',
-                    message.role === 'user' ? 'justify-end' : 'justify-start',
-                  )}
-                >
-                  <div className="flex min-w-0 flex-col gap-2.5">
-                    {message.parts.map((part, i) => {
-                      switch (part.type) {
-                        case 'text':
-                          return (
-                            <Message
-                              key={`${message.id}-${i}`}
-                              from={message.role}
-                              className="max-w-full"
-                            >
-                              <MessageContent
-                                className={cn(
-                                  'leading-relaxed',
-                                  'group-[.is-user]:rounded-2xl group-[.is-user]:rounded-br-md group-[.is-user]:border group-[.is-user]:border-app-line group-[.is-user]:bg-app-surface group-[.is-user]:px-4 group-[.is-user]:py-2.5 group-[.is-user]:text-app-text',
-                                  'group-[.is-assistant]:text-app-text',
-                                )}
+              <AnimatePresence initial={false}>
+                {messages.map((message) => (
+                  <motion.div
+                    key={message.id}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    transition={{ duration: 0.2, ease: 'easeOut' }}
+                    className={cn(
+                      'flex w-full gap-3',
+                      message.role === 'user'
+                        ? 'justify-end'
+                        : 'justify-start',
+                    )}
+                  >
+                    <div className="flex min-w-0 flex-col gap-2.5">
+                      {message.parts.map((part, i) => {
+                        switch (part.type) {
+                          case 'text':
+                            return (
+                              <Message
+                                key={`${message.id}-${i}`}
+                                from={message.role}
+                                className="max-w-full"
                               >
-                                <Response>{part.text}</Response>
-                              </MessageContent>
-                            </Message>
-                          );
+                                <MessageContent
+                                  className={cn(
+                                    'leading-relaxed',
+                                    'group-[.is-user]:rounded-2xl group-[.is-user]:rounded-br-md group-[.is-user]:border group-[.is-user]:border-app-line group-[.is-user]:bg-app-surface group-[.is-user]:px-4 group-[.is-user]:py-2.5 group-[.is-user]:text-app-text',
+                                    'group-[.is-assistant]:text-app-text',
+                                  )}
+                                >
+                                  <Response>{part.text}</Response>
+                                </MessageContent>
+                              </Message>
+                            );
 
-                        case 'data-sources':
-                          return part.data.length === 0 ? null : (
-                            <Sources
-                              key={`${message.id}-${i}`}
-                              className="mb-0 text-app-muted"
-                            >
-                              <SourcesTrigger
-                                count={part.data.length}
-                                className="group/src rounded-full border border-app-line bg-app-surface px-3 py-1 text-app-muted transition-colors hover:text-app-text"
+                          case 'data-sources':
+                            return part.data.length === 0 ? null : (
+                              <Sources
+                                key={`${message.id}-${i}`}
+                                className="mb-0 text-app-muted"
                               >
-                                <BookOpen className="size-3.5" />
-                                <span className="font-medium">
-                                  {part.data.length} source
-                                  {part.data.length === 1 ? '' : 's'}
-                                </span>
-                                <ChevronDown className="size-3.5 transition-transform group-data-[state=open]/src:rotate-180" />
-                              </SourcesTrigger>
-                              <SourcesContent className="w-full">
-                                {part.data.map((source) => (
-                                  <div
-                                    key={source.chunkId}
-                                    className="app-card w-full rounded-xl p-3"
-                                  >
-                                    <div className="mb-1.5 flex items-center gap-2">
-                                      <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-app-teal/12 text-[10px] font-semibold text-app-teal">
-                                        {source.index}
-                                      </span>
-                                      <span className="min-w-0 flex-1 truncate font-medium text-app-text">
-                                        {source.documentTitle}
-                                      </span>
-                                      <span className="shrink-0 text-app-dim">
-                                        {Math.round(source.similarity * 100)}%
-                                      </span>
+                                <SourcesTrigger
+                                  count={part.data.length}
+                                  className="group/src rounded-full border border-app-line bg-app-surface px-3 py-1 text-app-muted transition-colors hover:text-app-text"
+                                >
+                                  <BookOpen className="size-3.5" />
+                                  <span className="font-medium">
+                                    {part.data.length} source
+                                    {part.data.length === 1 ? '' : 's'}
+                                  </span>
+                                  <ChevronDown className="size-3.5 transition-transform group-data-[state=open]/src:rotate-180" />
+                                </SourcesTrigger>
+                                <SourcesContent className="w-full">
+                                  {part.data.map((source) => (
+                                    <div
+                                      key={source.chunkId}
+                                      className="app-card w-full rounded-xl p-3"
+                                    >
+                                      <div className="mb-1.5 flex items-center gap-2">
+                                        <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-app-teal/12 text-[10px] font-semibold text-app-teal">
+                                          {source.index}
+                                        </span>
+                                        <span className="min-w-0 flex-1 truncate font-medium text-app-text">
+                                          {source.documentTitle}
+                                        </span>
+                                        <span className="shrink-0 text-app-dim">
+                                          {Math.round(source.similarity * 100)}%
+                                        </span>
+                                      </div>
+                                      <p className="line-clamp-3 leading-relaxed text-app-muted">
+                                        {source.snippet}
+                                      </p>
                                     </div>
-                                    <p className="line-clamp-3 leading-relaxed text-app-muted">
-                                      {source.snippet}
-                                    </p>
-                                  </div>
-                                ))}
-                              </SourcesContent>
-                            </Sources>
-                          );
+                                  ))}
+                                </SourcesContent>
+                              </Sources>
+                            );
 
-                        default:
-                          return null;
-                      }
-                    })}
-                  </div>
-                </div>
-              ))}
+                          default:
+                            return null;
+                        }
+                      })}
+                    </div>
+                  </motion.div>
+                ))}
 
-              {status === 'submitted' ? <ThinkingIndicator /> : null}
+                {status === 'submitted' ? (
+                  <motion.output
+                    key="thinking"
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -3 }}
+                    transition={{ duration: 0.16, ease: 'easeOut' }}
+                    aria-live="polite"
+                    className="flex w-fit items-center gap-2.5 py-1 text-sm text-app-muted"
+                  >
+                    <span className="flex items-center gap-1" aria-hidden="true">
+                      {[0, 1, 2].map((dot) => (
+                        <motion.span
+                          key={dot}
+                          className="size-1 rounded-full bg-app-muted"
+                          animate={{ opacity: [0.3, 1, 0.3] }}
+                          transition={{
+                            duration: 1.1,
+                            repeat: Number.POSITIVE_INFINITY,
+                            ease: 'easeInOut',
+                            delay: dot * 0.14,
+                          }}
+                        />
+                      ))}
+                    </span>
+                    <span>Thinking</span>
+                  </motion.output>
+                ) : null}
+              </AnimatePresence>
             </ConversationContent>
             <ConversationScrollButton />
           </Conversation>
@@ -294,9 +317,9 @@ export function ChatPage({ userName }: { userName: string }) {
                   type="submit"
                   aria-label="Send message"
                   disabled={!input.trim() || busy}
-                  className="flex size-9 shrink-0 items-center justify-center rounded-xl [background:var(--app-accent-gradient)] transition-all enabled:hover:scale-105 enabled:active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="flex size-9 shrink-0 items-center justify-center rounded-full bg-app-text text-app-bg transition-opacity duration-150 enabled:hover:opacity-80 enabled:active:opacity-70 disabled:cursor-not-allowed disabled:bg-app-hover disabled:text-app-dim"
                 >
-                  <ArrowUp className="size-4 text-white" />
+                  <ArrowUp className="size-[18px]" strokeWidth={2.25} />
                 </button>
               </div>
             </form>
