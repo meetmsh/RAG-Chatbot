@@ -20,3 +20,13 @@ export type DocumentSummary = {
   byteSize: number;
   createdAt: string;
 };
+
+export type ConversationSummary = {
+  id: number;
+  title: string;
+  updatedAt: string;
+};
+
+export type ConversationDetail = ConversationSummary & {
+  messages: RagUIMessage[];
+};

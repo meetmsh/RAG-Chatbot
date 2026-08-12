@@ -1,9 +1,17 @@
 'use client';
 
 import { useChat } from '@ai-sdk/react';
-import { ArrowUp, BookOpen, ChevronDown, PlusIcon } from 'lucide-react';
+import {
+  ArrowUp,
+  BookOpen,
+  ChevronDown,
+  History,
+  Loader2,
+  PlusIcon,
+  Square,
+} from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
-import { useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Conversation,
   ConversationContent,
@@ -20,42 +28,224 @@ import {
   SourcesTrigger,
 } from '@/components/ai-elements/sources';
 import { SignoutButton } from '@/components/auth/signout-button';
+import { ConversationList } from '@/components/conversations/conversation-list';
 import { DocumentPanel } from '@/components/documents/document-panel';
 import { ThemeToggle } from '@/components/theme-toggle';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 import { APP_NAME } from '@/lib/app-config';
-import type { RagUIMessage } from '@/lib/chat-types';
+import type {
+  ConversationDetail,
+  ConversationSummary,
+  RagUIMessage,
+} from '@/lib/chat-types';
 import { cn } from '@/lib/utils';
 
 const MAX_CHARS = 1000;
 
+function placeFirst(
+  conversations: ConversationSummary[],
+  conversation: ConversationSummary,
+) {
+  return [
+    conversation,
+    ...conversations.filter((item) => item.id !== conversation.id),
+  ];
+}
+
+async function saveConversation(id: number, messages: RagUIMessage[]) {
+  try {
+    const res = await fetch(`/api/conversations/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages }),
+    });
+
+    if (!res.ok) return null;
+    const data: { conversation: ConversationSummary } = await res.json();
+    return data.conversation;
+  } catch {
+    return null;
+  }
+}
+
 export function ChatPage({ userName }: { userName: string }) {
   const [input, setInput] = useState('');
+  const [conversations, setConversations] = useState<ConversationSummary[]>([]);
+  const [activeConversationId, setActiveConversationId] = useState<
+    number | null
+  >(null);
+  const [loadingConversations, setLoadingConversations] = useState(true);
+  const [loadingConversationId, setLoadingConversationId] = useState<
+    number | null
+  >(null);
+  const [creatingConversation, setCreatingConversation] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { messages, sendMessage, status, setMessages } =
-    useChat<RagUIMessage>();
+  const activeConversationRef = useRef<number | null>(null);
+  const { messages, sendMessage, status, setMessages, stop } =
+    useChat<RagUIMessage>({
+      onFinish: async ({ messages: finishedMessages }) => {
+        const id = activeConversationRef.current;
+        if (!id) return;
+
+        const updated = await saveConversation(id, finishedMessages);
+        if (updated) {
+          setConversations((current) => placeFirst(current, updated));
+        }
+      },
+    });
+  const statusRef = useRef(status);
+  statusRef.current = status;
+
+  const loadConversations = useCallback(async () => {
+    try {
+      const res = await fetch('/api/conversations');
+      if (!res.ok) return;
+
+      const data: { conversations: ConversationSummary[] } = await res.json();
+      setConversations(data.conversations);
+    } catch {
+      // History is secondary to the active chat, so keep the composer usable.
+    } finally {
+      setLoadingConversations(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadConversations();
+  }, [loadConversations]);
 
   const firstName = userName?.split(' ')[0] || 'there';
   const initial = (userName?.trim()[0] ?? '?').toUpperCase();
-  const busy = status === 'submitted' || status === 'streaming';
+  const generating = status === 'submitted' || status === 'streaming';
+  const busy = generating || creatingConversation;
   const nearLimit = input.length > MAX_CHARS * 0.8;
+  const activeTitle = conversations.find(
+    (conversation) => conversation.id === activeConversationId,
+  )?.title;
 
-  const submit = () => {
-    if (!input.trim() || busy) return;
-    sendMessage({ text: input });
+  const selectActiveConversation = (id: number | null) => {
+    activeConversationRef.current = id;
+    setActiveConversationId(id);
+  };
+
+  const preserveActiveStream = async () => {
+    const id = activeConversationRef.current;
+    if (!generating) return;
+
+    await stop();
+
+    const deadline = Date.now() + 4000;
+    while (
+      (statusRef.current === 'submitted' ||
+        statusRef.current === 'streaming') &&
+      Date.now() < deadline
+    ) {
+      await new Promise((resolve) => setTimeout(resolve, 25));
+    }
+
+    if (id) {
+      const updated = await saveConversation(id, messages);
+      if (updated) {
+        setConversations((current) => placeFirst(current, updated));
+      }
+    }
+  };
+
+  const startNewConversation = async () => {
+    await preserveActiveStream();
+    selectActiveConversation(null);
+    setMessages([]);
     setInput('');
-    // The textarea grows with its content, so collapse it back on send.
+    setHistoryOpen(false);
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
+  };
+
+  const resumeConversation = async (id: number) => {
+    if (id === activeConversationRef.current) {
+      setHistoryOpen(false);
+      return;
+    }
+
+    await preserveActiveStream();
+    setLoadingConversationId(id);
+
+    try {
+      const res = await fetch(`/api/conversations/${id}`);
+      if (!res.ok) return;
+
+      const data: { conversation: ConversationDetail } = await res.json();
+      selectActiveConversation(data.conversation.id);
+      setMessages(data.conversation.messages);
+      setHistoryOpen(false);
+    } catch {
+      // Keep the current conversation visible when history cannot be loaded.
+    } finally {
+      setLoadingConversationId(null);
+    }
+  };
+
+  const submit = async () => {
+    if (!input.trim() || busy) return;
+    const text = input.trim();
+    setInput('');
+    if (textareaRef.current) textareaRef.current.style.height = 'auto';
+
+    let conversationId = activeConversationRef.current;
+
+    if (!conversationId) {
+      setCreatingConversation(true);
+
+      try {
+        const res = await fetch('/api/conversations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: text }),
+        });
+
+        if (!res.ok) {
+          setInput(text);
+          return;
+        }
+
+        const data: { conversation: ConversationSummary } = await res.json();
+        conversationId = data.conversation.id;
+        selectActiveConversation(conversationId);
+        setConversations((current) =>
+          placeFirst(current, data.conversation),
+        );
+      } catch {
+        setInput(text);
+        return;
+      } finally {
+        setCreatingConversation(false);
+      }
+    }
+
+    if (conversationId) {
+      await sendMessage(
+        { text },
+        { body: { conversationId } },
+      );
+    }
   };
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
-    submit();
+    void submit();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      submit();
+      void submit();
     }
   };
 
@@ -77,12 +267,34 @@ export function ChatPage({ userName }: { userName: string }) {
         <div className="px-3 pb-6">
           <button
             type="button"
-            onClick={() => setMessages([])}
+            onClick={() => void startNewConversation()}
             className="flex w-full items-center gap-2.5 rounded-[6px] px-3 py-2.5 text-sm font-medium text-app-text transition-colors duration-150 hover:bg-app-hover/60"
           >
             <PlusIcon className="size-4 text-app-muted" strokeWidth={1.8} />
             New chat
           </button>
+        </div>
+
+        {/* Conversations */}
+        <div className="px-3 pb-5">
+          <div className="flex items-center justify-between px-3 pb-2.5">
+            <span className="text-xs font-medium text-app-dim">Recent</span>
+            {conversations.length > 0 ? (
+              <span className="text-[11px] tabular-nums text-app-dim">
+                {conversations.length}
+              </span>
+            ) : null}
+          </div>
+          <div>
+            <ConversationList
+              conversations={conversations}
+              activeId={activeConversationId}
+              loadingId={loadingConversationId}
+              loading={loadingConversations}
+              onSelect={(id) => void resumeConversation(id)}
+              className="max-h-44"
+            />
+          </div>
         </div>
 
         {/* Knowledge base */}
@@ -109,11 +321,58 @@ export function ChatPage({ userName }: { userName: string }) {
         <header className="relative z-20 flex h-14 shrink-0 items-center justify-between border-b border-app-line/70 px-6 backdrop-blur-sm">
           <span className="text-sm font-semibold md:hidden">{APP_NAME}</span>
           <span className="hidden text-sm text-app-dim md:block">
-            {messages.length === 0
-              ? 'New conversation'
-              : `${messages.length} message${messages.length === 1 ? '' : 's'}`}
+            {activeTitle ?? 'New conversation'}
           </span>
-          <ThemeToggle />
+          <div className="flex items-center gap-1.5">
+            <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
+              <SheetTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="Open conversations"
+                  className="flex size-9 cursor-pointer items-center justify-center rounded-full text-app-muted transition-colors hover:bg-app-hover/60 hover:text-app-text md:hidden"
+                >
+                  <History className="size-4" strokeWidth={1.8} />
+                </button>
+              </SheetTrigger>
+              <SheetContent
+                side="left"
+                className="w-[86vw] gap-0 border-none bg-app-sidebar p-0"
+              >
+                <SheetHeader className="px-5 pt-5 pb-3">
+                  <SheetTitle className="text-sm font-semibold text-app-text">
+                    Conversations
+                  </SheetTitle>
+                  <SheetDescription className="sr-only">
+                    Start a new conversation or resume a previous one.
+                  </SheetDescription>
+                </SheetHeader>
+                <div className="px-3">
+                  <button
+                    type="button"
+                    onClick={() => void startNewConversation()}
+                    className="flex w-full cursor-pointer items-center gap-2.5 rounded-[6px] px-3 py-2.5 text-sm font-medium text-app-text transition-colors hover:bg-app-hover/60"
+                  >
+                    <PlusIcon
+                      className="size-4 text-app-muted"
+                      strokeWidth={1.8}
+                    />
+                    New chat
+                  </button>
+                </div>
+                <div className="min-h-0 flex-1 overflow-hidden px-3 pt-4 pb-5">
+                  <ConversationList
+                    conversations={conversations}
+                    activeId={activeConversationId}
+                    loadingId={loadingConversationId}
+                    loading={loadingConversations}
+                    onSelect={(id) => void resumeConversation(id)}
+                    className="h-full"
+                  />
+                </div>
+              </SheetContent>
+            </Sheet>
+            <ThemeToggle />
+          </div>
         </header>
 
         {messages.length === 0 ? (
@@ -314,12 +573,20 @@ export function ChatPage({ userName }: { userName: string }) {
                   </span>
                 ) : null}
                 <button
-                  type="submit"
-                  aria-label="Send message"
-                  disabled={!input.trim() || busy}
+                  type={generating ? 'button' : 'submit'}
+                  onClick={generating ? () => void stop() : undefined}
+                  aria-label={generating ? 'Stop response' : 'Send message'}
+                  title={generating ? 'Stop response' : undefined}
+                  disabled={!generating && (!input.trim() || creatingConversation)}
                   className="flex size-9 shrink-0 items-center justify-center rounded-full bg-app-text text-app-bg transition-opacity duration-150 enabled:hover:opacity-80 enabled:active:opacity-70 disabled:cursor-not-allowed disabled:bg-app-hover disabled:text-app-dim"
                 >
-                  <ArrowUp className="size-[18px]" strokeWidth={2.25} />
+                  {generating ? (
+                    <Square className="size-3" fill="currentColor" />
+                  ) : creatingConversation ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <ArrowUp className="size-[18px]" strokeWidth={2.25} />
+                  )}
                 </button>
               </div>
             </form>

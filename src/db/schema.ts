@@ -5,9 +5,11 @@ import {
   timestamp,
   serial,
   integer,
+  jsonb,
   vector,
   index,
 } from 'drizzle-orm/pg-core';
+import type { RagUIMessage } from '@/lib/chat-types';
 
 // User's Schema
 export const user = pgTable('user', {
@@ -77,6 +79,21 @@ export const documents = pgTable(
   (table) => [index('documentsUserIdIndex').on(table.userId)],
 );
 
+export const conversations = pgTable(
+  'conversations',
+  {
+    id: serial('id').primaryKey(),
+    userId: text('userId')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    messages: jsonb('messages').$type<RagUIMessage[]>().notNull().default([]),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (table) => [index('conversationsUserIdIndex').on(table.userId)],
+);
+
 // Chunks are the unit of retrieval. One document fans out into many.
 export const chunks = pgTable(
   'chunks',
@@ -119,3 +136,6 @@ export type SelectDocument = typeof documents.$inferSelect;
 
 export type InsertChunk = typeof chunks.$inferInsert;
 export type SelectChunk = typeof chunks.$inferSelect;
+
+export type InsertConversation = typeof conversations.$inferInsert;
+export type SelectConversation = typeof conversations.$inferSelect;
