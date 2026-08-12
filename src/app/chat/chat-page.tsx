@@ -105,6 +105,11 @@ export function ChatPage({ userName }: { userName: string }) {
 
         {/* Knowledge base */}
         <DocumentPanel />
+
+        {/* Account */}
+        <div className="border-t border-gray-200 p-3 dark:border-[var(--app-border)]">
+          <SignoutButton />
+        </div>
       </aside>
 
       {/* Main content */}
@@ -114,7 +119,6 @@ export function ChatPage({ userName }: { userName: string }) {
 
         <div className="absolute top-5 right-6 z-20 flex items-center gap-3">
           <ThemeToggle />
-          <SignoutButton />
         </div>
 
         {messages.length === 0 ? (
@@ -243,7 +247,7 @@ export function ChatPage({ userName }: { userName: string }) {
               />
               <div className="flex items-center gap-4 px-4 pb-4 pt-1">
                 <span className="text-sm text-gray-400/80 dark:text-[var(--app-text-dim)]">
-                  Answers are grounded in your uploaded documents
+                  Ask anything, or upload a document to ask about it
                 </span>
                 <div className="flex-1" />
                 <span className="text-sm text-gray-400 dark:text-[var(--app-text-dim)]">

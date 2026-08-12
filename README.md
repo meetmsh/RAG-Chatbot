@@ -1,4 +1,4 @@
-# RAGChat
+# AI Rag Assistant
 
 A chat application that answers general questions and, when you ask about your
 own documents, retrieves the relevant passages first and grounds the answer in
