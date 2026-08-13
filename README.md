@@ -1,4 +1,4 @@
-# AI Rag Assistant
+# Knowledge Assistant
 
 A multi-user RAG chat application that answers general questions and grounds
 document-specific answers in passages retrieved from each user's private

@@ -24,6 +24,7 @@ import {
 import { SignoutButton } from '@/components/auth/signout-button';
 import { ConversationList } from '@/components/conversations/conversation-list';
 import { MessageCitations } from '@/components/conversations/message-citations';
+import { MessageCopyButton } from '@/components/conversations/message-copy-button';
 import { DocumentPanel } from '@/components/documents/document-panel';
 import { ThemeToggle } from '@/components/theme-toggle';
 import {
@@ -45,7 +46,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { APP_NAME } from '@/lib/app-config';
+import { APP_DESCRIPTION, APP_NAME } from '@/lib/app-config';
 import type {
   ConversationDetail,
   ConversationSummary,
@@ -343,7 +344,7 @@ export function ChatPage({ userName }: { userName: string }) {
             {APP_NAME}
           </div>
           <div className="mt-0.5 truncate text-xs text-app-dim">
-            Grounded in your documents
+            {APP_DESCRIPTION}
           </div>
         </div>
 
@@ -501,24 +502,32 @@ export function ChatPage({ userName }: { userName: string }) {
             </div>
           </div>
         ) : (
-          <Conversation className="app-scroll relative z-10 flex-1 px-6">
-            <ConversationContent className="mx-auto w-full max-w-3xl gap-6 py-8">
-              <AnimatePresence initial={false}>
-                {messages.map((message) => (
+          <Conversation className="app-scroll relative z-10 flex-1 px-4 sm:px-6">
+            <ConversationContent className="mx-auto w-full max-w-3xl gap-5 py-8 sm:py-10">
+              <AnimatePresence initial={false} mode="popLayout">
+                {messages.map((message, messageIndex) => (
                   <motion.div
                     key={message.id}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -4 }}
-                    transition={{ duration: 0.2, ease: 'easeOut' }}
+                    layout="position"
+                    initial={{ opacity: 0, y: 5, filter: 'blur(2px)' }}
+                    animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                    exit={{ opacity: 0, y: -3 }}
+                    transition={{ duration: 0.24, ease: 'easeOut' }}
                     className={cn(
-                      'flex w-full gap-3',
+                      'flex w-full',
                       message.role === 'user'
                         ? 'justify-end'
-                        : 'justify-start',
+                        : 'justify-start pb-3',
                     )}
                   >
-                    <div className="flex min-w-0 flex-col gap-2.5">
+                    <div
+                      className={cn(
+                        'flex min-w-0 flex-col gap-2.5',
+                        message.role === 'user'
+                          ? 'max-w-[85%] sm:max-w-[75%]'
+                          : 'w-full max-w-[44rem]',
+                      )}
+                    >
                       {message.parts.map((part, i) => {
                         switch (part.type) {
                           case 'text':
@@ -530,12 +539,20 @@ export function ChatPage({ userName }: { userName: string }) {
                               >
                                 <MessageContent
                                   className={cn(
-                                    'leading-relaxed',
-                                    'group-[.is-user]:rounded-2xl group-[.is-user]:rounded-br-md group-[.is-user]:border group-[.is-user]:border-app-line group-[.is-user]:bg-app-surface group-[.is-user]:px-4 group-[.is-user]:py-2.5 group-[.is-user]:text-app-text',
-                                    'group-[.is-assistant]:text-app-text',
+                                    'break-words leading-relaxed',
+                                    'group-[.is-user]:rounded-2xl group-[.is-user]:rounded-br-[5px] group-[.is-user]:bg-app-hover/80 group-[.is-user]:px-4 group-[.is-user]:py-2.5 group-[.is-user]:text-app-text',
+                                    'group-[.is-assistant]:w-full group-[.is-assistant]:max-w-[68ch] group-[.is-assistant]:text-[15px] group-[.is-assistant]:leading-7 group-[.is-assistant]:text-app-text',
                                   )}
                                 >
-                                  <Response>{part.text}</Response>
+                                  <Response
+                                    animated
+                                    isAnimating={
+                                      status === 'streaming' &&
+                                      messageIndex === messages.length - 1
+                                    }
+                                  >
+                                    {part.text}
+                                  </Response>
                                 </MessageContent>
                               </Message>
                             );
@@ -556,8 +573,17 @@ export function ChatPage({ userName }: { userName: string }) {
                             .filter((part) => part.type === 'text')
                             .map((part) => part.text)
                             .join('\n')}
-                        />
+                          />
                       ) : null}
+                      <MessageCopyButton
+                        text={message.parts
+                          .filter((part) => part.type === 'text')
+                          .map((part) => part.text)
+                          .join('\n')}
+                        className={
+                          message.role === 'user' ? 'self-end' : 'self-start'
+                        }
+                      />
                     </div>
                   </motion.div>
                 ))}
@@ -565,29 +591,25 @@ export function ChatPage({ userName }: { userName: string }) {
                 {status === 'submitted' ? (
                   <motion.output
                     key="thinking"
-                    initial={{ opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -3 }}
-                    transition={{ duration: 0.16, ease: 'easeOut' }}
+                    layout="position"
+                    initial={{ opacity: 0, y: 4, filter: 'blur(2px)' }}
+                    animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                    exit={{ opacity: 0, y: 0, filter: 'blur(2px)' }}
+                    transition={{ duration: 0.2, ease: 'easeOut' }}
                     aria-live="polite"
-                    className="flex w-fit items-center gap-2.5 py-1 text-sm text-app-muted"
+                    className="w-full max-w-[44rem] pb-3"
                   >
-                    <span className="flex items-center gap-1" aria-hidden="true">
-                      {[0, 1, 2].map((dot) => (
-                        <motion.span
-                          key={dot}
-                          className="size-1 rounded-full bg-app-muted"
-                          animate={{ opacity: [0.3, 1, 0.3] }}
-                          transition={{
-                            duration: 1.1,
-                            repeat: Number.POSITIVE_INFINITY,
-                            ease: 'easeInOut',
-                            delay: dot * 0.14,
-                          }}
-                        />
-                      ))}
-                    </span>
-                    <span>Thinking</span>
+                    <motion.span
+                      className="text-[15px] leading-7 text-app-muted"
+                      animate={{ opacity: [0.45, 1, 0.45] }}
+                      transition={{
+                        duration: 1.35,
+                        repeat: Number.POSITIVE_INFINITY,
+                        ease: 'easeInOut',
+                      }}
+                    >
+                      Thinking...
+                    </motion.span>
                   </motion.output>
                 ) : null}
               </AnimatePresence>
