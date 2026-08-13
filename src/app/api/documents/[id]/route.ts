@@ -5,7 +5,7 @@ import { getSession } from '@/lib/auth';
 
 export async function DELETE(
   _req: Request,
-  ctx: RouteContext<'/api/documents/[id]'>,
+  ctx: { params: Promise<{ id: string }> },
 ) {
   const session = await getSession();
 

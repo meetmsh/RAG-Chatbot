@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "biome lint src/app src/components/auth src/components/conversations src/components/documents src/components/theme-provider.tsx src/components/theme-toggle.tsx src/db src/hooks src/lib drizzle.config.ts next.config.ts",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "format": "biome format --write"
   },
   "dependencies": {
