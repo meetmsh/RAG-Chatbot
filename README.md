@@ -8,6 +8,16 @@ showing the source document and passage used.
 Built with Next.js 16, React 19, TypeScript, the Vercel AI SDK, OpenAI, Drizzle
 ORM, Better Auth, and Neon Postgres with pgvector.
 
+## Product Preview
+
+### Streaming conversation
+
+![Knowledge Assistant conversation with a streamed AI response](docs/screenshots/conversation.png)
+
+| Secure OAuth sign-in | Document knowledge workspace |
+| --- | --- |
+| [![Knowledge Assistant sign-in screen](docs/screenshots/sign-in.png)](docs/screenshots/sign-in.png) | [![Knowledge Assistant empty chat workspace](docs/screenshots/empty-chat.png)](docs/screenshots/empty-chat.png) |
+
 ## Features
 
 - Upload and index PDF, DOCX, TXT, and Markdown documents up to 10MB.
