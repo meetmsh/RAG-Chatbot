@@ -611,7 +611,7 @@ export function ChatPage({ userName }: { userName: string }) {
                     setInput(e.target.value);
                 }}
                 onKeyDown={handleKeyDown}
-                placeholder={`Message ${APP_NAME}...`}
+                placeholder="What would you like to know?"
                 className="max-h-48 w-full resize-none bg-transparent px-5 pt-4 pb-1 text-sm leading-relaxed text-app-text outline-none placeholder:text-app-dim"
                 rows={1}
                 onInput={(e) => {
