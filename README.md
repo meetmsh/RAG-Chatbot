@@ -1,5 +1,7 @@
 # Knowledge Assistant
 
+[![Quality](https://github.com/meetmsh/RAG-Chatbot/actions/workflows/quality.yml/badge.svg?branch=main)](https://github.com/meetmsh/RAG-Chatbot/actions/workflows/quality.yml)
+
 A multi-user RAG chat application that answers general questions and grounds
 document-specific answers in passages retrieved from each user's private
 knowledge base. Responses stream in real time and include expandable citations
