@@ -3,8 +3,6 @@
 import { useChat } from '@ai-sdk/react';
 import {
   ArrowUp,
-  BookOpen,
-  ChevronDown,
   History,
   Loader2,
   PlusIcon,
@@ -23,13 +21,9 @@ import {
   MessageContent,
   MessageResponse as Response,
 } from '@/components/ai-elements/message';
-import {
-  Sources,
-  SourcesContent,
-  SourcesTrigger,
-} from '@/components/ai-elements/sources';
 import { SignoutButton } from '@/components/auth/signout-button';
 import { ConversationList } from '@/components/conversations/conversation-list';
+import { MessageCitations } from '@/components/conversations/message-citations';
 import { DocumentPanel } from '@/components/documents/document-panel';
 import { ThemeToggle } from '@/components/theme-toggle';
 import {
@@ -547,52 +541,23 @@ export function ChatPage({ userName }: { userName: string }) {
                             );
 
                           case 'data-sources':
-                            return part.data.length === 0 ? null : (
-                              <Sources
-                                key={`${message.id}-${i}`}
-                                className="mb-0 text-app-muted"
-                              >
-                                <SourcesTrigger
-                                  count={part.data.length}
-                                  className="group/src rounded-full border border-app-line bg-app-surface px-3 py-1 text-app-muted transition-colors hover:text-app-text"
-                                >
-                                  <BookOpen className="size-3.5" />
-                                  <span className="font-medium">
-                                    {part.data.length} source
-                                    {part.data.length === 1 ? '' : 's'}
-                                  </span>
-                                  <ChevronDown className="size-3.5 transition-transform group-data-[state=open]/src:rotate-180" />
-                                </SourcesTrigger>
-                                <SourcesContent className="w-full">
-                                  {part.data.map((source) => (
-                                    <div
-                                      key={source.chunkId}
-                                      className="app-card w-full rounded-xl p-3"
-                                    >
-                                      <div className="mb-1.5 flex items-center gap-2">
-                                        <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-app-teal/12 text-[10px] font-semibold text-app-teal">
-                                          {source.index}
-                                        </span>
-                                        <span className="min-w-0 flex-1 truncate font-medium text-app-text">
-                                          {source.documentTitle}
-                                        </span>
-                                        <span className="shrink-0 text-app-dim">
-                                          {Math.round(source.similarity * 100)}%
-                                        </span>
-                                      </div>
-                                      <p className="line-clamp-3 leading-relaxed text-app-muted">
-                                        {source.snippet}
-                                      </p>
-                                    </div>
-                                  ))}
-                                </SourcesContent>
-                              </Sources>
-                            );
+                            return null;
 
                           default:
                             return null;
                         }
                       })}
+                      {message.role === 'assistant' ? (
+                        <MessageCitations
+                          sources={message.parts.flatMap((part) =>
+                            part.type === 'data-sources' ? part.data : [],
+                          )}
+                          responseText={message.parts
+                            .filter((part) => part.type === 'text')
+                            .map((part) => part.text)
+                            .join('\n')}
+                        />
+                      ) : null}
                     </div>
                   </motion.div>
                 ))}

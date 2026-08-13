@@ -3,6 +3,7 @@ import type { UIMessage } from 'ai';
 export type RetrievedSource = {
   index: number;
   chunkId: number;
+  chunkIndex?: number;
   documentId: number;
   documentTitle: string;
   snippet: string;

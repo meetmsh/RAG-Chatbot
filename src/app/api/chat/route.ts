@@ -46,9 +46,10 @@ export async function POST(req: Request) {
           data: retrieved.map((chunk, i) => ({
             index: i + 1,
             chunkId: chunk.chunkId,
+            chunkIndex: chunk.chunkIndex,
             documentId: chunk.documentId,
             documentTitle: chunk.documentTitle,
-            snippet: chunk.content.slice(0, 300),
+            snippet: chunk.content.slice(0, 600),
             similarity: Number(chunk.similarity.toFixed(3)),
           })),
         });

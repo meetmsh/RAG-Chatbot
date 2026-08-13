@@ -18,6 +18,7 @@ const MIN_SIMILARITY = 0.3;
 
 export type RetrievedChunk = {
   chunkId: number;
+  chunkIndex: number;
   documentId: number;
   documentTitle: string;
   content: string;
@@ -98,6 +99,7 @@ export async function retrieveChunks(
   return db
     .select({
       chunkId: chunks.id,
+      chunkIndex: chunks.chunkIndex,
       documentId: chunks.documentId,
       documentTitle: documents.title,
       content: chunks.content,
@@ -136,7 +138,8 @@ export function buildContextPrompt(retrieved: RetrievedChunk[]) {
   return [
     'You are a helpful assistant with access to a personal document library.',
     "The numbered context below was retrieved from the user's documents because it matched their message.",
-    'Prefer it over your own knowledge and cite what you use inline with its bracketed number, for example [1].',
+    'Prefer it over your own knowledge. Every claim grounded in the context must include the matching bracketed source number, for example [1].',
+    'Only cite a source when its text directly supports the claim. Do not cite sources you did not use.',
     'If the context turns out not to answer the question, say so and then answer from general knowledge, making clear which part came from where.',
     '',
     'Context:',
