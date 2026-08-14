@@ -1,4 +1,4 @@
-# Knowledge Assistant
+# AI Knowledge Assistant
 
 [![Quality](https://github.com/meetmsh/RAG-Chatbot/actions/workflows/quality.yml/badge.svg?branch=main)](https://github.com/meetmsh/RAG-Chatbot/actions/workflows/quality.yml)
 
